@@ -1,2 +1,3 @@
-# skripts
-Minecraft SkriptLang "Plugins"
+todo:
+write about custom LTS setup
+licence?
