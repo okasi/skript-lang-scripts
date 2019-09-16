@@ -1,0 +1,92 @@
+# #![<Random Location Teleport>]
+#<Integer> 1 is x <Integer> 2 is z
+command /rloc <text=info> [<text>] [<Integer>] [<Integer>] [<Integer>]:
+	trigger:
+		if arg 1 is "Info":
+			message "Use ""/rloc tp %%name of area%% ""to get teleported there."
+			if player has permission "skDemand.setwarp":
+				message "Use ""/rloc set %%name of area%% "" to set a point"
+				message "Use ""/rloc delete %%name of area%% "" to delete a point"
+		if arg 1 is "create" or "set":
+			if player is op:
+				if argument 3 is not set:
+					message "please enter an radius"
+				message "Area: %argument 2% set."
+				set {Randomlocation.%argument 2%} to location of player
+				set {RlList::%arg 2%} to arg-3
+				if arg-4 is not set:
+					set {RlList2::%arg 2%} to arg-3
+				if arg-4 is set:
+					set {RlList2::%arg 2%} to arg-4	
+				message "Set point to %location of player%"
+				if argument 5 is not set:
+					set y-coordinate of {Randomlocation.%argument 2%} to 100
+				else:
+					set y-coordinate of {Randomlocation.%argument 2%} to argument 5
+		if arg 1 is "delete":
+			if player has permission "skdemand.setwarp":
+				if {Randomlocation.%argument 2%} is not set:
+					stop
+				clear {Randomlocation.%argument 2%}
+				clear {RlList::%arg 2%}
+				message "Cleared the Random Location area %argument 2%"
+		if arg 1 is "list":
+			loop {RlList::*}:
+				add 1 to {_nr}
+				send "&6Zone &7%{_nr}%&f: %loop-index% with radius %loop-value%" #Message
+		if arg 1 is "tp":
+			invoke "portal" from "Underworld" and "%player%"
+			
+				
+on sign edit:
+	if line 1 of block is "[RL]":
+		if player doesn't have the permission "skDemand.setwarp":
+			message "You can't create an Randomlocation sign"
+			cancel event
+			stop
+		stop
+
+on click on sign:
+	if line 1 of block is "&a[RL]":
+		if line 2 of block is "&bUnderworld":
+			invoke "portal" from "Underworld" and "%player%"
+			
+command /watisdat:
+	trigger:
+		broadcast "%targeted block of player%"
+			
+sub "portal":
+	set {_player} to "%parameter 2%" parsed as player
+	if {Randomlocation.%parameter 1%} is not set:
+		stop
+	set {_Tries} to 0
+	while {_Tries} is below 100: #Don't set this too high	
+		set {_randomlocation} to location of {_player}
+		set x-coordinate of {_randomlocation} to x-coordinate of {Randomlocation.%parameter 1%}
+		set z-coordinate of {_randomlocation} to z-coordinate of {Randomlocation.%parameter 1%}
+		set {_X} to a random number between (0 - {RlList::%parameter 1%}) and {RlList::%parameter 1%}
+		set {_Z} to a random number between (0 - {RlList2::%parameter 1%}) and {RlList2::%parameter 1%}
+		set x-coordinate of {_randomlocation} to ({_X} + x-coordinate of  {_randomlocation})
+		set z-coordinate of {_randomlocation} to ({_Z} + z-coordinate of  {_randomlocation})
+		set y-coordinate of {_randomlocation} to  12
+		loop blocks above {_randomlocation}:
+			if loop-block is pine slab item or lily pad or lapis lazuli block or upside-down pine slab item or pine wood plank:
+				if block above loop-block is air:
+					if block 2 above loop-block is air:
+						set {_randomlocation.2} to location of loop-block
+		if {_randomlocation.2} is set:
+			teleport {_player} to block above {_randomlocation.2}
+			set {_Tries} to 9999
+			clear {_randomlocation}
+		loop blocks below {_randomlocation}:
+			if loop-block is pine slab item or lily pad or lapis lazuli block or upside-down pine slab item or pine wood plank:
+				if block above loop-block is air:
+					if block 2 above loop-block is air:
+						teleport {_player} to block above loop-block
+						set {_Tries} to 9999
+						clear {_randomlocation}
+		add 1 to {_Tries}
+#	if {_player} have permission "skript.double.jump":
+#		if {skDemand.Fly::%{_player}%} is not set:
+#			if {_player}'s gamemode is not creative:
+#				set fly mode of {_player} to false

@@ -1,0 +1,510 @@
+#test
+
+on load:
+	set {skDemand.Anti-Cheat} to now
+on unload:
+	clear {skDemand.Anti-Cheat}
+# #![<Info>]
+
+# #! skDemand Anti-Cheat by Supa_Dupa_Man
+# @REQUIRES_skQuery_v.3.22.1+
+
+# #! Some info:
+#Explanation for the different hacks: http://bit.ly/1rQa4sB
+#To bypass fly detection (can be used for effects like push & homing) just give the player this variable: {skDemand.Anti-Cheat.Fly.Bypass.%player%}
+
+# #? Needs to be done:
+#Prevent Speed Hack:
+# Check for ice bellow & above
+# Check for speed boost
+# Check for x & z cordinate
+# Check for walk speed
+#Prevent Criticals only
+#Prevent NoFall
+#Prevent NoKnockback
+#Prevent NoSlowDown
+#Prevent Step
+
+#on login:
+#	wait 1.95 seconds
+#	if player has permission "skDemand.join.antihack":
+#		stop
+#	else:
+#		send " "
+#		send "&dWrite &b&l.join&r&d to stay in the server"
+#		send " "
+#		set {skDemand.join.antihack::%player%} to false
+#		wait 8.8 seconds
+#		if {skDemand.join.antihack::%player%} is false:
+#			kick the player due to "&6%newline%Please write &b&l.join &6when you rejoin%newline%so that we can be sure you are not hacking.%newline% %newline%&8Thank you for your understanding."
+#			clear {skDemand.join.antihack::%player%}
+#on chat:
+#	if {skDemand.join.antihack::%player%} is false:
+#		cancel the event
+#		if "%message%" is ".join":
+#			clear {skDemand.join.antihack::%player%}
+#			send "&aYou have been verified."
+
+on quit:
+	clear {skDemand.join.antihack::%player%}
+			
+on skript stop:			
+	clear {skDemand.join.antihack::*}
+
+	
+# #![<GodMode>]
+on damage:
+	attacker is a player
+	if attacker's gamemode is not creative:
+		set {_life} to health of victim
+		if damage is bigger than 3:
+			wait 1 tick
+			if {_life} is health of victim:
+				add 1 to {GodMode.Warning::%victim%}
+				if {GodMode.Warning::%victim%} is greater than 4:
+					make console execute command "ctempban %victim% Godmode 48 hour"
+
+on quit:
+	clear {GodMode.Warning::%player%}
+
+on skript stop:
+	clear {GodMode.Warning::*}
+	
+	
+# #![<FastPlace & AutoBuild>]
+on place:
+	If difference between {Place.Cooldown::%player%} and now is less than 1.8 ticks:
+		cancel event
+		add 1 to {FastPlace.Warning::%player%}
+		if {FastPlace.Warning::%player%} is greater than 4:
+			make console execute command "ctempban %player% FastPlace 48 hour"
+		wait 3.3 seconds
+		reduce {FastPlace.Warning::%player%} by 1
+		if {FastPlace.Warning::%player%} is more than 0:
+			reduce {FastPlace.Warning::%player%} by 1
+		else:
+			clear {FastPlace.Warning::%player%}
+	set {Place.Cooldown::%player%} to now
+			
+on place:
+	if targeted block is ladder or grass or dead shrub or fern or sapling or button or vines or water or lava:
+		stop
+	loop blocks in radius 3 around event-block:
+		if location of loop-block is location of targeted block:
+			stop
+	add 1 to {AutoBuild.Warning::%player%}
+	cancel event
+	if {AutoBuild.Warning::%player%} is greater than 3:
+		make console execute command "ctempban %player% AutoBuild 48 hour"
+	wait 3.3 seconds
+	reduce {AutoBuild.Warning::%player%} by 1
+	if {AutoBuild.Warning::%player%} is more than 0:
+		reduce {AutoBuild.Warning::%player%} by 1
+	else:
+		clear {AutoBuild.Warning::%player%}
+
+	
+on quit:
+	clear {FastPlace.Warning::%player%}
+	clear {AutoBuild.Warning::%player%}
+	clear {Place.Cooldown::%player%}
+
+on skript stop:
+	clear {FastPlace.Warning::*}
+	clear {AutoBuild.Warning::*}
+	clear {Place.Cooldown::*}
+
+
+# #![<Nuke & Water & Lava interact>]
+on break:
+	if player's gamemode is creative:
+		stop
+	if event-block is lava or water:
+		cancel event
+		make console execute command "ctempban %player% Liquids 48 hour"
+	if targeted block of player is event-block:
+		stop
+	wait 1 tick
+	if targeted block of player is event-block:
+		stop
+	add 1 to {Nuke.Warning::%player%}
+	if {Nuke.Warning::%player%} is greater than 5:
+		make console execute command "ctempban %player% Nuke 48 hour"
+		clear {Nuke.Warning::%player%}
+	wait 20 seconds
+	reduce {Nuke.Warning::%player%} by 1
+
+on quit:
+	clear {Nuke.Warning::%player%}
+
+on skript stop:
+	clear {Nuke.Warning::*}
+
+	
+# #![<Reach>]
+on damage:
+	attacker is a player
+	projectile doesn't exist
+	if attacker's gamemode is not creative:
+		if distance between attacker and victim is greater than 5.35:
+			cancel event
+			add 1 to {Reach.Warning::%attacker%}
+			if {Reach.Warning::%attacker%} is greater than 2.75:
+				make console execute command "ctempban %attacker% Reach 48 hour"
+			wait 3.3 seconds
+			reduce {Reach.Warning::%attacker%} by 1
+			if {Reach.Warning::%attacker%} is more than 0:
+				reduce {Reach.Warning::%attacker%} by 1
+			else:
+				clear {Reach.Warning::%attacker%}
+		
+on block damage:
+	if player's gamemode is not creative:
+		if distance between player and event-block is greater than 5.35:
+			cancel event
+			add 1 to {Reach.Warning::%player%}
+			if {Reach.Warning::%player%} is greater than 2.75:
+				make console execute command "ctempban %player% Reach 48 hour"
+			wait 3.3 seconds
+			reduce {Reach.Warning::%player%} by 1
+			if {Reach.Warning::%player%} is more than 0:
+				reduce {Reach.Warning::%player%} by 1
+			else:
+				clear {Reach.Warning::%player%}
+			
+on quit:
+	clear {Reach.Warning::%player%}
+
+on skript stop:
+	clear {Reach.Warning::*}
+
+	
+# #![<Forcefield>]
+on damage:
+	attacker is a player
+	projectile doesn't exist
+	attacker is not victim
+	if distance between attacker and victim is less than 1:
+		stop
+	if difference between {ForceField.Cooldown::%attacker%} and now is {ForceField.Cooldown::%attacker%}:
+		set {_sametime} to true
+	set {ForceField.Cooldown::%attacker%} to difference between {ForceField.Cooldown::%attacker%} and now
+	set {ForceField.Cooldown::%attacker%} to now
+	set {_target} to attacker's target entity
+	if {_sametime} is true:
+		set {_hacks} to true
+	if {_target} is not set:
+		set {_hacks} to true
+	else if {_target} is not victim:
+		set {_hacks} to true
+	if {_hacks} is true:
+		add 1 to {ForceField.Warning::%attacker%}
+		broadcast "ForceField: %{ForceField.Warning::%attacker%}%"
+		if {ForceField.Warning::%attacker%} is greater than 5.75:
+			make console execute command "ctempban %attacker% ForceField 48 hour"
+			clear {ForceField.Warning::%attacker%}
+		wait 2.4 seconds
+		reduce {ForceField.Warning::%attacker%} by 1
+		if {ForceField.Warning::%attacker%} is more than 0:
+			reduce {ForceField.Warning::%attacker%} by 1
+		else:
+			clear {ForceField.Warning::%attacker%}
+	
+on quit:
+	clear {ForceField.Warning::%player%}
+	clear {ForceField.Cooldown::%player%}
+
+on skript stop:
+	clear {ForceField.Warning::*}
+	clear {ForceField.Cooldown::*}
+			
+			
+# #![<FastClick & Nuke>]
+on left click:
+	If difference between {Click.Cooldown::%player%} and now is less than 0.3 ticks:
+		cancel event
+		add 1 to {Fastclick.Warning::%player%}
+		if {Fastclick.Warning::%player%} is greater than 7.75:
+			make console execute command "ctempban %player% FastClick 48 hour"
+			clear {Fastclick.Warning::%player%}
+	set {Click.Cooldown::%player%} to now
+	wait 3.3 seconds
+	reduce {Fastclick.Warning::%player%} by 1
+	if {Fastclick.Warning::%player%} is more than 0:
+		reduce {Fastclick.Warning::%player%} by 1
+	else:
+		clear {Fastclick.Warning::%player%}
+	
+on quit:
+	clear {Click.Cooldown::%player%}
+	clear {Fastclick.Warning.%player%}
+
+on skript stop:
+	clear {Click.Cooldown::*}
+	clear {Fastclick.Warning::*}
+	
+	
+# #![<Auto Sneak>]
+on chat:
+	player is sneaking
+	cancel event
+	add 1 to {Sneak.Warning::%player%}
+	if {Sneak.Warning::%player%} is greater than 2.75:
+		make console execute command "ctempban %player% Sneak chat 48 hour"
+		clear {Sneak.Warning::%player%}
+	wait 3.3 seconds
+	reduce {Sneak.Warning::%player%} by 1
+	if {Sneak.Warning::%player%} is more than 0:
+		reduce {Sneak.Warning::%player%} by 1
+	else:
+		clear {Sneak.Warning::%player%}
+	
+on command:
+	player is sneaking
+	add 1 to {Sneak.Warning::%player%}
+	if {Sneak.Warning::%player%} is greater than 2.75:
+		make console execute command "ctempban %player% Sneak command 48 hour"
+		clear {Sneak.Warning::%player%}
+	wait 3.3 seconds
+	reduce {Sneak.Warning::%player%} by 1
+	if {Sneak.Warning::%player%} is more than 0:
+		reduce {Sneak.Warning::%player%} by 1
+	else:
+		clear {Sneak.Warning::%player%}
+
+on inventory click:
+	player is sneaking
+	if player's gamemode is not creative:
+		cancel event
+		add 1 to {Sneak.Warning::%player%}
+		if {Sneak.Warning::%player%} is greater than 2.75:
+			make console execute command "ctempban %player% Sneak click 48 hour"
+			clear {Sneak.Warning::%player%}
+		wait 3.3 seconds
+		reduce {Sneak.Warning::%player%} by 1
+		if {Sneak.Warning::%player%} is more than 0:
+			reduce {Sneak.Warning::%player%} by 1
+		else:
+			clear {Sneak.Warning::%player%}
+
+on inventory close:
+	player is sneaking
+	{in.combat.%player%} is not set
+	add 1 to {Sneak.Warning::%player%}
+	if {Sneak.Warning::%player%} is greater than 2.75:
+		make console execute command "ctempban %player% Sneak inv close 48 hour"
+		clear {Sneak.Warning::%player%}
+	wait 3.3 seconds
+	reduce {Sneak.Warning::%player%} by 1
+	if {Sneak.Warning::%player%} is more than 0:
+		reduce {Sneak.Warning::%player%} by 1
+	else:
+		clear {Sneak.Warning::%player%}
+		
+on quit:
+	clear {Sneak.Warning::%player%}
+
+on skript stop:
+	clear {Sneak.Warning::*}
+	
+	
+# #![<Flying & Spider & FastClimb & Jesus Mode>]
+on any movement:
+	if player's gamemode is not creative:
+		if {Fly::%player%} is not set:
+			if {Fly.Bypass::%player%} is not set:
+				if {Fly.Y-Coordinate::%player%} is set:
+					set {_y} to y coordinate of location of player
+					set {_Speed} to difference between y-coordinate of player and {Fly.Y-Coordinate::%player%}
+					if {_y} is bigger than {Fly.Y-Coordinate::%player%}:
+						
+						#Spider
+						if block at player is air:
+							if block below player is not ladder or no vines or stair or water or lava:
+								if block west of player is not ladder or no vines or stair or water or lava:
+									if block east of player is not ladder or no vines or stair or water or lava:
+										if block north of player is not ladder or no vines or stair or water or lava:
+											if block south of player is not ladder or no vines or stair or water or lava:
+												if {_Speed} is {Fly.Speed::%player%}:
+													add 1 to {Spider.Warning::%player%}
+													broadcast "&eSpider: %{Spider.Warning::%player%}%"
+													if {Spider.Warning::%player%} is greater than 3.75:
+														#make console execute command "ctempban %player% Spider 48 hour"
+														broadcast "&4Spider Ban"
+														clear {Spider.Warning::%player%}
+													wait 3.3 seconds
+													if {Spider.Warning::%player%} is more than 0:
+														reduce {Spider.Warning::%player%} by 1
+													else:
+														clear {Spider.Warning::%player%}
+										
+						#FastClimb
+						if block at player is ladder or no vine:
+							if {_Speed} is bigger than 0.195:
+								if {_Speed} is less than 0.3:
+									broadcast "Speed: %{_Speed}%"
+									add 1 to {FastClimb.Warning::%player%}
+									broadcast "&dFastclimb: %{FastClimb.Warning::%player%}%"
+									if {FastClimb.Warning::%player%} is greater than 4.75:
+										#make console execute command "ctempban %player% FastClimb 48 hour"
+										broadcast "&4Fastclimb ban"
+										clear {FastClimb.Warning::%player%}
+									wait 1.7 seconds
+									if {FastClimb.Warning::%player%} is more than 0:
+										reduce {FastClimb.Warning::%player%} by 1
+									else:
+										clear {FastClimb.Warning::%player%}
+					
+					#Flight
+					if player doesn't have jump boost:
+						if block above player is air:
+							if block 0.1 below the player is air:
+								if block 1 below the player is air:
+									if block west below player is air:
+										if block east below player is air:
+											if block north below player is air:
+												if block south below player is air:
+													set {_ry} to rounded up {_y}
+													set {_check} to "%{_ry}-{_y}%"
+													if {_check} is not "0.47" or "0.45" or "0.63" or "0.72" or "0.2" or "0.18" or "0.68" or "0.6" or "0.3" or "0.38" or "0.87" or "0.94" or "0.77" or "0.55" or "0.8" or "0.69" or "0.97" or "0.81" or "0.74" or "0.82" or "0.85" or "0.62" or "0.61" or "0.79" or "0.53" or "0.66" or "0.88" or "0.42" or "0.39" or "0.44" or "0.57" or "0.64" or "0.02" or "0.84" or "0.9" or "0.52" or "0.48" or "0.51" or "0.49" or "0.43" or "0.23" or "0.11" or "0.07" or "0.12" or "0.24" or "0.43" or "0.7" or "0.36" or "0.17" or "0.06" or "0.04" or "0.09" or "0.14" or "0.86" or "0.67" or "0.56" or "0.54" or "0.59" or "0.73" or "0.9" or "0.58" or "0.34" or "0.21" or "0.08" or "0.48" or "0.71" or "0.5" or "0.75" or "0.83" or "0" or "1" or "0.33" or "0.25" or "0.46" or "0.98":
+														if {Fly.Y-Coordinate::%player%} is less than {_y}:
+															add 1 to {Fly.Warning::%player%}
+															set {_found} to true
+														if {_y} is {Fly.Y-Coordinate::%player%}:
+															if {_check} is not "0.21" or "0.98" or "0.9" or "1" or "0.83" or "0.58" or "0.75" or "0.74" or "0.25" or "0.5" or "0":
+																chance of 44%:
+																	add 1 to {Fly.Warning::%player%}
+																set {_found} to true
+													if {_found} is true:
+														broadcast "&9Fly: %{Fly.Warning::%player%}%"
+														if {Fly.Warning::%player%} is greater than 5.75:
+															#make console execute command "ctempban %player% Flight 48 hour"
+															broadcast "&4Flight ban"
+														wait 3.3 seconds
+														reduce {Fly.Warning::%player%} by 1
+														if {Fly.Warning::%player%} is more than 0:
+															reduce {Fly.Warning::%player%} by 1
+														else:
+															clear {Fly.Warning::%player%}
+										
+						#Liquid walking
+						if block at player is air or water or lava:
+							if block below player is water or lava:
+								if block west below player is water or lava or air:
+									if block east below player is water or lava or air:
+										if block north below player is water or lava or air:
+											if block south below player is water or lava or air:
+												add 1 to {Jesus.Warning::%player%}
+												if {Jesus.Warning::%player%} is greater than 17:
+													make console execute command "ctempban %player% Liquid walking 48 hour"
+													clear {Jesus.Warning::%player%}
+												wait 3.3 seconds
+												if {Jesus.Warning::%player%} is more than 0:
+													reduce {Jesus.Warning::%player%} by 1
+												else:
+													clear {Jesus.Warning::%player%}
+		
+				set {Fly.Y-Coordinate::%player%} to y coordinate of location of player
+				set {Fly.Speed::%player%} to {_Speed}
+		
+on quit:
+	clear {Fly.Y-Coordinate::%player%}
+	clear {Fly.Speed::%player%}
+	clear {Fly.Warning::%player%}
+	clear {FastClimb.Warning::%player%}
+	clear {Spider.Warning::%player%}
+	clear {Jesus.Warning::%player%}
+
+on skript stop:
+	clear {Fly.Y-Coordinate::*}
+	clear {Fly.Speed::*}
+	clear {Fly.Warning::*}
+	clear {FastClimb.Warning::*}
+	clear {Spider.Warning::*}
+	clear {Jesus.Warning::*}
+
+	
+# #![<Fast Drop>]
+on drop:
+	if difference between {Drop.Cooldown::%player%} and now is less than 1.8 ticks:
+		add 1 to {QuickDrop.Warning::%player%}
+		if {QuickDrop.Warning::%player%} is greater than 4:
+			make console execute command "ctempban %player% AutoDrop 48 hour"
+		cancel event
+		set {Drop.Cooldown::%player%} to now
+		wait 5 seconds
+		reduce {QuickDrop.Warning::%player%} by 1
+		stop
+	set {Drop.Cooldown::%player%} to now
+
+on quit:
+	clear {Drop.Cooldown::%player%}
+	clear {QuickDrop.Warning::%player%}
+
+on skript stop:
+	clear {Drop.Cooldown::*}
+	clear {QuickDrop.Warning::*}
+	
+	
+# #![<Fast Bow>]
+on shoot:
+	if difference between {Bow.Cooldown::%shooter%} and now is less than 4.8 ticks:
+		add 1 to {Quickbow.Warning::%shooter%}
+		if {Quickbow.Warning::%shooter%} is greater than 4:
+			make console execute command "ctempban %shooter% FastBow 48 hour"
+		cancel event
+		set {Bow.Cooldown::%shooter%} to now
+		wait 5 seconds
+		reduce {Quickbow.Warning::%shooter%} by 1
+		stop
+	set {Bow.Cooldown::%shooter%} to now
+
+on quit:
+	clear {Bow.Cooldown::%player%}
+	clear {Quickbow.Warning::%player%}
+	
+on skript stop:
+	loop all players:
+		clear {Bow.Cooldown::%loop-player%}
+		clear {Quickbow.Warning::%loop-player%}
+
+		
+# #![<Auto Block>]
+on damage:
+	attacker is blocking
+	cancel event
+	add 1 to {AutoBlock.Warning::%attacker%}
+	if {AutoBlock.Warning::%attacker%} is greater than 3:
+		make console execute command "ctempban %attacker% AutoBlock 48 hour"
+	wait 15 seconds
+	reduce {AutoBlock.Warning::%attacker%} by 1
+on quit:
+	clear {AutoBlock.Warning::%player%}
+on skript stop:
+	loop all players:
+		clear {AutoBlock.Warning::%loop-player%}
+		
+		
+# #![<Regeneration & Instant Eat>]
+
+on consume:
+	if difference between {Eat.Cooldown::%player%} and now is less than 20 ticks:
+		add 1 to {QuickEat.Warning::%player%}
+		broadcast "lmao"
+		if {QuickEat.Warning::%player%} is greater than 5:
+			make console execute command "ctempban %player% Regeneration or FastEat 48 hour"
+		cancel event
+		set {Eat.Cooldown::%player%} to now
+		wait 5 seconds
+		reduce {QuickEat.Warning::%player%} by 1
+		stop
+	set {Eat.Cooldown::%player%} to now
+
+on quit:
+	clear {Eat.Cooldown::%player%}
+	clear {QuickEat.Warning::%player%}
+	
+on skript stop:
+	clear {Eat.Cooldown::*}
+	clear {QuickEat.Warning::*}
+	

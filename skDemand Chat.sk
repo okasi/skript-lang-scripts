@@ -1,0 +1,855 @@
+on load:
+	set {skDemand.Chat} to now
+	
+on unload:
+	clear {skDemand.Chat}
+	
+# startfold #![<Info>]
+
+# #! skDemand Chat by ZupaDupaMan
+# @REQUIRES_skQuery_v.3.22.1+
+
+# #! Some info:
+	
+#Usage:
+#invoke "Text.Go.Thru" from "%player%" and "%message%"
+#%{skDemand.Message::%player%}%
+
+options:
+	Donor1.Prefix: &6[&d&lVIP&6]  #Give the player also permission: "skDemand.group.donor1" 
+	Donor2.Prefix: &6[&7&lEzio&6]  #Give the player also permission: "skDemand.group.donor2" 
+	Donor3.Prefix: &6[&f&lAltair&6] #Give the player also permission: "skDemand.group.donor3" 
+	Donor4.Prefix: &6[&d&l&lEdward&6] #Give the player also permission: "skDemand.group.donor4" 
+	Donor5.Prefix: &6[&5&lDesmond&6] #Give the player also permission: "skDemand.group.donor5" 
+	Builder.Prefix: &6[&e&lBuilder&r&6] #Give the player also permission: "skDemand.group.builder" 
+	Mod.Prefix: &6[&b&lMod&r&6] #Give the player also permission: "skDemand.group.mod" 
+	Admin.Prefix: &6[&4&lAdmin&6] #Give the player also permission: "skDemand.group.admin" 
+	Owner.Prefix: &6[&4O&ew&2n&be&fr&6] #Give the player also permission: "skDemand.group.owner" 
+	
+# subfold #![<Variables>]
+
+variables:
+#Some popular rank prefix decoration
+	{skDemand.Chat.Ask::[} = "["
+	{skDemand.Chat.Ask::]} = "]"
+	{skDemand.Chat.Ask::)} = ")"
+	{skDemand.Chat.Ask::(} = "("
+	{skDemand.Chat.Ask::>} = ">"
+	{skDemand.Chat.Ask::<} = "<"
+
+# Colours
+	{skDemand.Chat.Colour::&0} = "<black>"
+	{skDemand.Chat.Colour::&1} = "<dark blue>"
+	{skDemand.Chat.Colour::&2} = "<dark green>"
+	{skDemand.Chat.Colour::&d&l} = "<dark aqua>"
+	{skDemand.Chat.Colour::&4} = "<dark red>"
+	{skDemand.Chat.Colour::&5} = "<dark purple>"
+	{skDemand.Chat.Colour::&6} = "<gold>"
+	{skDemand.Chat.Colour::&7} = "<grey>"
+	{skDemand.Chat.Colour::&8} = "<dark grey>"
+	{skDemand.Chat.Colour::&9} = "<light blue>"
+	{skDemand.Chat.Colour::&a} = "<light green>"
+	{skDemand.Chat.Colour::&b} = "<light cyan>"
+	{skDemand.Chat.Colour::&4} = "<red>"
+	{skDemand.Chat.Colour::&d} = "<light purple>"
+	{skDemand.Chat.Colour::&e} = "<yellow>"
+	{skDemand.Chat.Colour::&f} = "<white>"
+	{skDemand.Chat.Colour::&c} = "<light red>"
+
+# Formats
+	{skDemand.Chat.Format::&k} = "<magic>"
+	{skDemand.Chat.Format::&l} = "<bold>"
+	{skDemand.Chat.Format::&m} = "<strikethrough>"
+	{skDemand.Chat.Format::&n} = "<underline>"
+	{skDemand.Chat.Format::&o} = "<italic>"
+	{skDemand.Chat.Format::&r} = "<reset>"
+
+# Symbol - Add your own symbol or delete ones already made ({skDemand.Chat.Symbol::<symbol used>} = "<symbol replaced>") [Symbols taken from www.fsymbols.com]
+	{skDemand.Chat.Symbol::<3} = "❤"
+	{skDemand.Chat.Symbol::[Up]} = "▲"
+	{skDemand.Chat.Symbol::[Down]} = "▼"
+	{skDemand.Chat.Symbol::[Mail]} = "✉"
+	{skDemand.Chat.Symbol::[Skull]} = "☠"
+	{skDemand.Chat.Symbol::[X]} = "☒"
+	{skDemand.Chat.Symbol::[/]} = "☑"
+	{skDemand.Chat.Symbol::[Note]} = "♪"
+	{skDemand.Chat.Symbol:::)} = "☺"
+	{skDemand.Chat.Symbol:::(} = "☹"
+	{skDemand.Chat.Symbol::>} = "►"
+	{skDemand.Chat.Symbol::<} = "◄"
+	{skDemand.Chat.Symbol:::d} = ":D"
+	{skDemand.Chat.Symbol::xd} = "XD"
+	{skDemand.Chat.Symbol::xp} = "XP"
+	{skDemand.Chat.Symbol::;d} = ";D"
+	{skDemand.Chat.Symbol::o_} = "O_"
+	{skDemand.Chat.Symbol::_o} = "_O"
+	{skDemand.Chat.Symbol::o-} = "O-"
+	{skDemand.Chat.Symbol::-o} = "-O"
+	{skDemand.Chat.Symbol:::p} = ":P"
+	
+# Censor - Add your own censors or delete ones already made ({skDemand.Chat.Censor::<word used>} = "✯")
+	{skDemand.Chat.Censor::anus} = true
+	{skDemand.Chat.Censor::arse} = true
+	{skDemand.Chat.Censor::ass} = true
+	{skDemand.Chat.Censor::axwound} = true
+	{skDemand.Chat.Censor::bampot} = true
+	{skDemand.Chat.Censor::bastard} = true
+	{skDemand.Chat.Censor::beaner} = true
+	{skDemand.Chat.Censor::bitch} = true
+	{skDemand.Chat.Censor::blowjob} = true
+	{skDemand.Chat.Censor::bollocks} = true
+	{skDemand.Chat.Censor::bollox} = true
+	{skDemand.Chat.Censor::boner} = true
+	{skDemand.Chat.Censor::buttplug} = true
+	{skDemand.Chat.Censor::buttpirate} = true
+	{skDemand.Chat.Censor::cameltoe} = true
+	{skDemand.Chat.Censor::carpetmuncher} = true
+	{skDemand.Chat.Censor::chesticle} = true
+	{skDemand.Chat.Censor::cheat} = true
+	{skDemand.Chat.Censor::chinc} = true
+	{skDemand.Chat.Censor::chink} = true
+	{skDemand.Chat.Censor::choad} = true
+	{skDemand.Chat.Censor::chode} = true
+	{skDemand.Chat.Censor::clit} = true
+	{skDemand.Chat.Censor::cock} = true
+	{skDemand.Chat.Censor::coochie} = true
+	{skDemand.Chat.Censor::coochy} = true
+	{skDemand.Chat.Censor::coon} = true
+	{skDemand.Chat.Censor::cooter} = true
+	{skDemand.Chat.Censor::cracker} = true
+	{skDemand.Chat.Censor::cum} = true
+	{skDemand.Chat.Censor::cunnie} = true
+	{skDemand.Chat.Censor::cunnilingus} = true
+	{skDemand.Chat.Censor::cunt} = true
+	{skDemand.Chat.Censor::dago} = true
+	{skDemand.Chat.Censor::damn} = true
+	{skDemand.Chat.Censor::deggo} = true
+	{skDemand.Chat.Censor::dick} = true
+	{skDemand.Chat.Censor::dike} = true
+	{skDemand.Chat.Censor::dildo} = true
+	{skDemand.Chat.Censor::doochbag} = true
+	{skDemand.Chat.Censor::dookie} = true
+	{skDemand.Chat.Censor::douche} = true
+	{skDemand.Chat.Censor::dyke} = true
+	{skDemand.Chat.Censor::fag} = true
+	{skDemand.Chat.Censor::fellatio} = true
+	{skDemand.Chat.Censor::feltch} = true
+	{skDemand.Chat.Censor::flamer} = true
+	{skDemand.Chat.Censor::fuck} = true
+	{skDemand.Chat.Censor::fucking} = true
+	{skDemand.Chat.Censor::fudgepacker} = true
+	{skDemand.Chat.Censor::gay} = true
+	{skDemand.Chat.Censor::gooch} = true
+	{skDemand.Chat.Censor::gook} = true
+	{skDemand.Chat.Censor::gringo} = true
+	{skDemand.Chat.Censor::guido} = true
+	{skDemand.Chat.Censor::handjob} = true
+	{skDemand.Chat.Censor::hardon} = true
+	{skDemand.Chat.Censor::heeb} = true
+	{skDemand.Chat.Censor::hell} = true
+	{skDemand.Chat.Censor::homo} = true
+	{skDemand.Chat.Censor::honkey} = true
+	{skDemand.Chat.Censor::humping} = true
+	{skDemand.Chat.Censor::jagoff} = true
+	{skDemand.Chat.Censor::jap} = true
+	{skDemand.Chat.Censor::jerkoff} = true
+	{skDemand.Chat.Censor::jigaboo} = true
+	{skDemand.Chat.Censor::jizz} = true
+	{skDemand.Chat.Censor::junglebunny} = true
+	{skDemand.Chat.Censor::kike} = true
+	{skDemand.Chat.Censor::kooch} = true
+	{skDemand.Chat.Censor::kootch} = true
+	{skDemand.Chat.Censor::kraut} = true
+	{skDemand.Chat.Censor::kunt} = true
+	{skDemand.Chat.Censor::kyke} = true
+	{skDemand.Chat.Censor::lesbian} = true
+	{skDemand.Chat.Censor::lesbo} = true
+	{skDemand.Chat.Censor::lezzie} = true
+	{skDemand.Chat.Censor::mick} = true
+	{skDemand.Chat.Censor::minge} = true
+	{skDemand.Chat.Censor::muff} = true
+	{skDemand.Chat.Censor::munging} = true
+	{skDemand.Chat.Censor::negro} = true
+	{skDemand.Chat.Censor::nigaboo} = true
+	{skDemand.Chat.Censor::nigga} = true
+	{skDemand.Chat.Censor::niggas} = true
+	{skDemand.Chat.Censor::niggaz} = true
+	{skDemand.Chat.Censor::nigger} = true
+	{skDemand.Chat.Censor::niggers} = true
+	{skDemand.Chat.Censor::niggerz} = true
+	{skDemand.Chat.Censor::niglet} = true
+	{skDemand.Chat.Censor::nutsack} = true
+	{skDemand.Chat.Censor::paki} = true
+	{skDemand.Chat.Censor::panooch} = true
+	{skDemand.Chat.Censor::pecker} = true
+	{skDemand.Chat.Censor::penis} = true
+	{skDemand.Chat.Censor::piss} = true
+	{skDemand.Chat.Censor::polesmoker} = true
+	{skDemand.Chat.Censor::pollock} = true
+	{skDemand.Chat.Censor::poon} = true
+	{skDemand.Chat.Censor::porchmonkey} = true
+	{skDemand.Chat.Censor::prick} = true
+	{skDemand.Chat.Censor::punanny} = true
+	{skDemand.Chat.Censor::punta} = true
+	{skDemand.Chat.Censor::pussies} = true
+	{skDemand.Chat.Censor::pussy} = true
+	{skDemand.Chat.Censor::puto} = true
+	{skDemand.Chat.Censor::queef} = true
+	{skDemand.Chat.Censor::queer} = true
+	{skDemand.Chat.Censor::renob} = true
+	{skDemand.Chat.Censor::rimjob} = true
+	{skDemand.Chat.Censor::ruski} = true
+	{skDemand.Chat.Censor::schlong} = true
+	{skDemand.Chat.Censor::scrote} = true
+	{skDemand.Chat.Censor::shit} = true
+	{skDemand.Chat.Censor::shiz} = true
+	{skDemand.Chat.Censor::skank} = true
+	{skDemand.Chat.Censor::skeet} = true
+	{skDemand.Chat.Censor::slut} = true
+	{skDemand.Chat.Censor::smeg} = true
+	{skDemand.Chat.Censor::snatch} = true
+	{skDemand.Chat.Censor::splooge} = true
+	{skDemand.Chat.Censor::tard} = true
+	{skDemand.Chat.Censor::testicle} = true
+	{skDemand.Chat.Censor::tit} = true
+	{skDemand.Chat.Censor::twat} = true
+	{skDemand.Chat.Censor::vag} = true
+	{skDemand.Chat.Censor::wank} = true
+	{skDemand.Chat.Censor::whore} = true
+	{skDemand.Chat.Censor::wop} = true
+	{skDemand.Chat.Censor::hack} = true
+	{skDemand.Chat.Censor::amk} = true
+	{skDemand.Chat.Censor::orospu} = true
+	{skDemand.Chat.Censor::stfu} = true
+	{skDemand.Chat.Censor::gtfo} = true
+	{skDemand.Chat.Censor::hoe} = true
+	{skDemand.Chat.Censor::prostitute} = true
+	
+# Domains - Add your own domains or delete ones already made ({skDemand.Domains::<domain>} = true)
+	{skDemand.Domains::com} = true
+	{skDemand.Domains::co} = true
+	{skDemand.Domains::net} = true
+	{skDemand.Domains::biz} = true
+	{skDemand.Domains::bz} = true
+	{skDemand.Domains::org} = true
+	{skDemand.Domains::us} = true
+	{skDemand.Domains::eu} = true
+	{skDemand.Domains::de} = true
+	{skDemand.Domains::se} = true
+	{skDemand.Domains::nl} = true
+	{skDemand.Domains::tk} = true
+	{skDemand.Domains::ga} = true
+	{skDemand.Domains::nu} = true
+	
+# Permission = Group Prefix
+on script load:
+	set {skDemand.Permission.Group::skDemand.group.donor1} to "{@Donor1.Prefix}"
+	set {skDemand.Permission.Group::skDemand.group.donor2} to "{@Donor2.Prefix}"
+	set {skDemand.Permission.Group::skDemand.group.donor3} to "{@Donor3.Prefix}"
+	set {skDemand.Permission.Group::skDemand.group.donor4} to "{@Donor4.Prefix}"
+	set {skDemand.Permission.Group::skDemand.group.donor5} to "{@Donor5.Prefix}"
+	set {skDemand.Permission.Group::skDemand.group.builder} to "{@Builder.Prefix}"
+	set {skDemand.Permission.Group::skDemand.group.mod} to "{@Mod.Prefix}"
+	set {skDemand.Permission.Group::skDemand.group.admin} to "{@Admin.Prefix}"
+	set {skDemand.Permission.Group::skDemand.group.owner} to "{@Owner.Prefix}"
+
+# subfold #![<Text Go Through>]
+sub "Text.Go.Thru":
+	set {_message} to "%parameter 2%" parsed as text
+	set {_player} to "%parameter 1%" parsed as player
+	set {_displayname} to "%display name of {_player}%"
+	
+#Minechat messages
+	if {_message} contains "connected with an iPhone using Minechat":
+		stop
+	if {_message} contains "connected with an iPad using Minechat":
+		stop
+	if {_message} contains "connected with an iPod touch using Minechat":
+		stop
+		
+#.Join antihack respond
+	if {_message} contains ".join":
+		stop
+		
+#Wool chat
+	if {_player} is holding brown wool:
+		set {_message} to "<orange>%{_message}%"
+		stop
+	if {_player} is holding wool:
+		set {_message} to "<%colour of {_player}'s tool%>%{_message}%"
+		
+#Muted check
+	if {skDemand.Chat.Muted::%{_player}%} is set:
+		if {skDemand.TempMute::%{_player}%} is set:
+			#Checks if the time is expired
+			set {_waited} to difference between now and {skDemand.TempMute.Time::%{_player}%}
+			#If it is expired it will make the player able to chat
+			if {_waited} is more than {skDemand.TempMute::%{_player}%}:
+				clear {skDemand.Chat.Muted::%{_player}%}
+				clear {skDemand.TempMute.Time::%{_player}%}
+				clear {skDemand.TempMute::%{_player}%}
+			else:
+				send "&cYou are temp muted." to {_player}
+				stop
+		else:
+			send "&cYou are muted." to {_player}
+			stop
+	
+#Cooldown/Spam detector
+	set {_waited} to difference between {skDemand.Spam::%{_player}%} and now
+	if {_waited} is less than 2 seconds:
+		send "&4&lNo spam!" to {_player}
+		stop
+		
+#No same message
+	if {skDemand.Last.Message::%{_player}%} is {_message}:
+		send "&4&lDon't repeat the same message!" to {_player}
+		stop
+	clear {skDemand.Last.Message::%{_player}%}
+	if {_message} is not "Yes" or "No" or "Hi" or "Hello":
+		set {skDemand.Last.Message::%{_player}%} to {_message}
+		
+#No Asking for stuff
+	set {_Donor1} to "{@Donor1.Prefix}"
+	set {_Donor2} to "{@Donor2.Prefix}"
+	set {_Donor3} to "{@Donor3.Prefix}"
+	set {_Donor4} to "{@Donor4.Prefix}"
+	set {_Donor5} to "{@Donor5.Prefix}"
+
+	loop {skDemand.Chat.Colour::*}:
+		replace loop-value with "" in {_Donor1}
+		replace loop-value with "" in {_Donor2}
+		replace loop-value with "" in {_Donor3}
+		replace loop-value with "" in {_Donor4}
+		replace loop-value with "" in {_Donor5}
+	loop {skDemand.Chat.Format::*}:
+		replace loop-value with "" in {_Donor1}
+		replace loop-value with "" in {_Donor2}
+		replace loop-value with "" in {_Donor3}
+		replace loop-value with "" in {_Donor4}
+		replace loop-value with "" in {_Donor5}
+	loop {skDemand.Chat.Ask::*}:
+		replace loop-index with "" in {_Donor1}
+		replace loop-index with "" in {_Donor2}
+		replace loop-index with "" in {_Donor3}
+		replace loop-index with "" in {_Donor4}
+		replace loop-index with "" in {_Donor5}
+			
+	if {_message} contains "can i have" or "can you give me" or "can she have" or "can you give her" or "can he have" or "can you give him":
+		if {_message} contains "%{_Donor1}%" or "%{_Donor2}%" or "%{_Donor3}%" or "%{_Donor4}%" or "%{_Donor5}%" or "builder" or "mod" or "admin" or "owner" or "moderator" or "Operator" or "op" or "creative" or "gamemode" or "money" or "cash" or "unban" or "unmute" or "mute" or "ban":
+			send "&4&lDon't ask for stuff!" to {_player}
+			stop
+
+#Start stuff
+	set {_Message::*} to {_message} split at " "
+	clear {_message}
+	loop {_Message::*}:
+		set {_Untested.Text} to loop-value
+		clear {_Tested.letter}
+		while {_Untested.Text} is set:
+			set {_Tested.Letter} to the first 1 characters of {_Untested.Text}
+				
+#No caps
+			if (the length of {_Untested.Text}) is smaller than (the length of loop-value):
+				if {_Tested.Letter} is "A":
+					set {_Tested.Letter} to "a"
+				if {_Tested.Letter} is "B":
+					set {_Tested.Letter} to "b"
+				if {_Tested.Letter} is "C":
+					set {_Tested.Letter} to "c"
+				if {_Tested.Letter} is "D":
+					set {_Tested.Letter} to "d"
+				if {_Tested.Letter} is "E":
+					set {_Tested.Letter} to "e"
+				if {_Tested.Letter} is "F":
+					set {_Tested.Letter} to "f"
+				if {_Tested.Letter} is "G":
+					set {_Tested.Letter} to "g"
+				if {_Tested.Letter} is "H":
+					set {_Tested.Letter} to "h"
+				if {_Tested.Letter} is "I":
+					set {_Tested.Letter} to "i"
+				if {_Tested.Letter} is "J":
+					set {_Tested.Letter} to "j"
+				if {_Tested.Letter} is "K":
+					set {_Tested.Letter} to "k"
+				if {_Tested.Letter} is "L":
+					set {_Tested.Letter} to "l"
+				if {_Tested.Letter} is "M":
+					set {_Tested.Letter} to "m"
+				if {_Tested.Letter} is "N":
+					set {_Tested.Letter} to "n"
+				if {_Tested.Letter} is "O":
+					set {_Tested.Letter} to "o"
+				if {_Tested.Letter} is "P":
+					set {_Tested.Letter} to "p"
+				if {_Tested.Letter} is "Q":
+					set {_Tested.Letter} to "q"
+				if {_Tested.Letter} is "R":
+					set {_Tested.Letter} to "r"
+				if {_Tested.Letter} is "S":
+					set {_Tested.Letter} to "s"
+				if {_Tested.Letter} is "T":
+					set {_Tested.Letter} to "t"
+				if {_Tested.Letter} is "U":
+					set {_Tested.Letter} to "u"
+				if {_Tested.Letter} is "V":
+					set {_Tested.Letter} to "v"
+				if {_Tested.Letter} is "W":
+					set {_Tested.Letter} to "w"
+				if {_Tested.Letter} is "X":
+					set {_Tested.Letter} to "x"
+				if {_Tested.Letter} is "Y":
+					set {_Tested.Letter} to "y"
+				if {_Tested.Letter} is "Z":
+					set {_Tested.Letter} to "z"				
+#No same 3 letter in row
+			if {_LastTested.Letter} is set:
+				if {_Tested.Letter} is {_LastTested.Letter}:
+					add 1 to {_LetterRepeat}
+				if {_Tested.Letter} isn't {_LastTested.Letter}:
+					set {_LetterRepeat} to 0
+					set {_LastTested.Letter} to {_Tested.Letter}
+			if {_LastTested.Letter} isn't set:
+				set {_LastTested.Letter} to {_Tested.Letter}
+			if {_Tested.Word} is set:
+				if {_LetterRepeat} is smaller than 3:
+					set {_Tested.Word} to "%{_Tested.Word}%%{_Tested.Letter}%"
+			if {_Tested.Word} is not set:
+				set {_Tested.Word} to "%{_Tested.Letter}%"
+				
+#Finishing the Word & swear block	
+			if the length of {_Untested.Text} is 1:
+				if {_player} does not have permission "skDemand.chat.censor-bypass":
+					if {skDemand.Chat.Censor::%{_Tested.Word}%} is set:
+						send "&4&lDon't Swear!" to {_player}
+						stop
+				set {_Message::%loop-index%} to {_Tested.Word}
+				set {_Lastindex} to loop-index
+				set {_Lastword} to {_Tested.Word}
+				clear {_Untested.Text}
+				clear {_Tested.Word}
+				clear {_LetterRepeat}
+			if {_Untested.Text} is set:
+				set {_Untested.Text} to subtext of {_Untested.Text} from characters 2 to (the length of {_Untested.Text} - 0)
+				
+#Ip adress blocker
+	set {_Size} to size of {_Message::*}
+	add 1 to {_Size}
+	set {_Loop-Number} to 1
+	while {_Loop-Number} is smaller than ({_Size} + 1):
+		set {_Iptest}  to true
+		set {_test::*} to {_Message::%{_Loop-Number}%} split at "."
+		if size of {_test::*} isn't 4:
+			set {_Iptest} to false
+		if size of {_test::*} is 4:
+			loop {_test::*}:
+				set {_index} to loop-index parsed as number
+				if {_index} is 1:
+					set {_Size} to the length of loop-value
+					set {_Relevantletters} to {_Size} - 3
+					set {_Text} to subtext of loop-value from characters {_Relevantletters} to {_Size}
+					set {_Text} to {_Text} parsed as number
+					if {_Text} is not set:
+						set {_Relevantletters} to {_Size} - 2
+						set {_Text} to subtext of loop-value from characters {_Relevantletters} to {_Size}
+						set {_Text} to {_Text} parsed as number
+						if {_Text} is not set:
+							set {_Relevantletters} to {_Size} - 1
+							set {_Text} to subtext of loop-value from characters {_Relevantletters} to {_Size}
+							set {_Text} to {_Text} parsed as number
+							if {_Text} is not set:
+								set {_Iptest} to false	
+					if {_Text} is bigger than 256:
+						set {_Iptest} to false	
+						clear {_Text}
+				if {_index} is bigger than 1:
+					if {_index} is smaller than 4:
+						set {_Text} to loop-value parsed as number
+						if {_Text} is not set:
+							set {_Iptest} to false
+						if {_Text} is bigger than 256:
+							set {_Iptest} to false	
+							clear {_Text}
+				if {_index} is 4:
+					set {_Text} to loop-value
+					set {_test.2::*} to {_Text} split at ":"
+					if size of {_test.2::*} is bigger than 2:
+						set {_Iptest} to false
+					if size of {_test.2::*} is 1:
+						set {_Relevantletters} to 3
+						if length of {_test.2::2} is smaller than 3:
+							set {_Relevantletters} to the length of {_test.2::2}
+						while {_correct} is not true:
+							set {_Text} to subtext of loop-value from characters 1 to {_Relevantletters}
+							set {_Text} to {_Text} parsed as number
+							if {_Text} is not set:
+								reduce {_Relevantletters} by 1
+							if {_Text} is set:
+								set {_correct} to true
+							if {_Relevantletters} is -1:
+								set {_correct} to true
+								set {_Text} to "257"
+						if {_Text} is bigger than 256:
+							set {_Iptest} to false 
+						if {_Text} is not set:
+							set {_Iptest} to false 
+						if size of {_test.2::*} is 2:
+							set {_Testnumber} to {_test.2::1} parsed as number
+							if {_Testnumber} is bigger than 256:
+								set {_Iptest} to false 
+							if {_Testnumber} is not set:
+								set {_Iptest} to false 
+							set {_Relevantletters} to 5
+							if length of {_test.2::2} is smaller than 5:
+								set {_Relevantletters} to the length of {_test.2::2}
+							while {_correct} is not true:
+								set {_Text} to subtext of loop-value from characters 1 to {_Relevantletters}
+								set {_Text} to {_Text} parsed as number
+								if {_Text} is not set:
+									reduce {_Relevantletters} by 1
+								if {_Text} is set:
+									set {_correct} to true
+								if {_Relevantletters} is -1:
+									set {_correct} to true
+									set {_Text} to "65536"
+							if {_Text} is bigger than 65535:
+								set {_Iptest} to false
+		clear {_Text}
+		if {_Iptest} is true:
+			if {_player} doesn't have permission "skDemand.ip-address-bypass":
+				send "&4&lDon't Advertise!" to {_player}
+				stop
+		add 1 to {_Loop-Number}
+		
+#Web address blocker
+	set {_Size} to size of {_Message::*}
+	set {_Loop-Number} to 1
+	while {_Loop-Number} is smaller than ({_Size} + 1):
+		set {_dotreplacer} to {_Message::%{_Loop-Number}%}
+		replace all "(dot)" in {_dotreplacer} with "."
+		replace all "[dot]" in {_dotreplacer} with "."
+		replace all "{dot}" in {_dotreplacer} with "."
+		replace all "dot" in {_dotreplacer} with "."
+		set {_test::*} to {_dotreplacer} split at "."
+		loop {_test::*}:
+			if {skDemand.Domains::%loop-value%} is set:
+				if {_player} doesn't have permission "skDemand.web-address-bypass":
+					send "&4&lDon't Advertise!" to {_player}
+					stop
+		add 1 to {_Loop-Number}
+
+#Pointation
+#	if {_LastTested.Letter} isn't "." or ":" or "?" or "!":
+#		set {_Message::%{_Lastindex}%} to "%{_Lastword}%." 
+
+#Final Stuff
+	loop {_Message::*}:
+		if {_Message} is not set:
+			set {_Message} to "%loop-value%"
+		else:
+			set {_Message} to "%{_Message}% %loop-value%"
+
+#Capitalising the first letter	
+	set {_Tested.Letter} to the first 1 character of {_Message}
+	set {_Text} to the subtext of {_Message} from character 2 to (the length of {_Message}-0)
+	if {_Tested.Letter} is "a":
+		set {_Tested.Letter} to "A"
+	if {_Tested.Letter} is "B":
+		set {_Tested.Letter} to "B"
+	if {_Tested.Letter} is "C":
+		set {_Tested.Letter} to "C"
+	if {_Tested.Letter} is "D":
+		set {_Tested.Letter} to "D"
+	if {_Tested.Letter} is "E":
+		set {_Tested.Letter} to "E"
+	if {_Tested.Letter} is "F":
+		set {_Tested.Letter} to "F"
+	if {_Tested.Letter} is "G":
+		set {_Tested.Letter} to "G"
+	if {_Tested.Letter} is "H":
+		set {_Tested.Letter} to "H"
+	if {_Tested.Letter} is "I":
+		set {_Tested.Letter} to "I"
+	if {_Tested.Letter} is "J":
+		set {_Tested.Letter} to "J"
+	if {_Tested.Letter} is "K":
+		set {_Tested.Letter} to "K"
+	if {_Tested.Letter} is "L":
+		set {_Tested.Letter} to "L"
+	if {_Tested.Letter} is "M":
+		set {_Tested.Letter} to "M"
+	if {_Tested.Letter} is "N":
+		set {_Tested.Letter} to "N"
+	if {_Tested.Letter} is "O":
+		set {_Tested.Letter} to "O"
+	if {_Tested.Letter} is "P":
+		set {_Tested.Letter} to "P"
+	if {_Tested.Letter} is "Q":
+		set {_Tested.Letter} to "Q"
+	if {_Tested.Letter} is "R":
+		set {_Tested.Letter} to "R"
+	if {_Tested.Letter} is "S":
+		set {_Tested.Letter} to "S"
+	if {_Tested.Letter} is "T":
+		set {_Tested.Letter} to "T"
+	if {_Tested.Letter} is "U":
+		set {_Tested.Letter} to "U"
+	if {_Tested.Letter} is "V":
+		set {_Tested.Letter} to "V"
+	if {_Tested.Letter} is "W":
+		set {_Tested.Letter} to "W"
+	if {_Tested.Letter} is "X":
+		set {_Tested.Letter} to "X"
+	if {_Tested.Letter} is "Y":
+		set {_Tested.Letter} to "Y"
+	if {_Tested.Letter} is "Z":
+		set {_Tested.Letter} to "Z"
+	if {_Text} is set:
+		set {_Message} to "%{_Tested.Letter}%%{_Text}%"
+	else:
+		set {_Message} to "%{_Tested.Letter}%"
+
+#Makes colour, format, symbols & censor work
+	loop {skDemand.Chat.Colour::*}:
+		{_player} has permission "skDemand.chat.colour"
+		replace all loop-index with loop-value in {_message}
+	loop {skDemand.Chat.Format::*}:
+		{_player} has permission "skDemand.chat.format"
+		replace all loop-index with loop-value in {_message}
+	loop {skDemand.Chat.Symbol::*}:
+		{_player} has permission "skDemand.chat.symbol"
+		replace all loop-index with loop-value in {_message}
+				
+	set {skDemand.Message::%{_player}%} to "%{_message}%"
+	invoke "Spam.Cooldown" from "%{_player}%"
+	wait 2 ticks
+	clear {skDemand.Message::%{_player}%}
+	stop
+	
+#Usage: invoke "Spam.Cooldown" from "%player%"
+sub "Spam.Cooldown":
+	set {_player} to "%parameter 1%" parsed as player
+	if {_player} have permission "skDemand.group.owner" or "skDemand.group.admin":
+		stop
+	set {skDemand.Spam::%parameter 1%} to now
+	wait 2 seconds
+	clear {skDemand.Spam::%parameter 1%}
+			
+on chat:
+	cancel event
+	if {Last.Movement::%player%} is not set:
+		stop
+	invoke "Text.Go.Thru" from "%player%" and "%message%"
+	if {skDemand.Nick.colour::%player%} is set:
+		if {skDemand.Nick.colour::%player%} is "&3":
+			set display name of player to "<blue>%player%"
+		if {skDemand.Nick.colour::%player%} is "&2":
+			set display name of player to "<green>%player%"
+		if {skDemand.Nick.colour::%player%} is "&5":
+			set display name of player to "<purple>%player%"
+		if {skDemand.Nick.colour::%player%} is "&c":
+			set display name of player to "<red>%player%"
+		if {skDemand.Nick.colour::%player%} is "&e":
+			set display name of player to "<yellow>%player%"
+	if {Creeds.Player.%player%.Creed} is set:
+		if {Creeds.Player.%player%.Creedchat} is true:
+			loop all players:
+				if {Creeds.Player.%loop-player%.Creed} is {Creeds.Player.%player%.Creed}:
+					if {Creeds.Creed.%{Creeds.Player.%player%.Creed}%.Leader} is "%player%":
+						send "&b&lC &c&lLEADER &7%player%&8: &7%{skDemand.Message::%player%}%" to loop-player
+					else:
+						send "&b&lC &7%player%&8: &7%{skDemand.Message::%player%}%" to loop-player
+			set display name of player to name of player
+			stop
+		if {skDemand.Message::%player%} is set:
+			if {skDemand.Prefix::%player%} is set:
+				loop all players:
+					if {skDemand.IgnoreList::%loop-player%.%player%} is not set:
+						send json of "&6[&a%{Creeds.Player.%player%.Creed}%&6]&r %{skDemand.Prefix::%player%}%&r&f " then "%player's displayname%" tooltip "&6&l&nClick&r &6&lto see options%new line%&6&lthat you can do with:%new line%&b&n%name of player%" run "/chatoptionstooltipruncommand %name of player%" then "&8:&7 %{skDemand.Message::%player%}%" to loop-player
+			else:
+				loop all players:
+					if {skDemand.IgnoreList::%loop-player%.%player%} is not set:
+						send json of "&6[&a%{Creeds.Player.%player%.Creed}%&6]&r " then "&o&l%player's displayname%" tooltip "&6&l&nClick&r &6&lto see options%new line%&6&lthat you can do with:%new line%&b&n%name of player%" run "/chatoptionstooltipruncommand %name of player%" then "&8:&7 %{skDemand.Message::%player%}%" to loop-player
+			set display name of player to name of player
+			stop
+	if {skDemand.Message::%player%} is set:
+		if {skDemand.Prefix::%player%} is set:
+			loop all players:
+				if {skDemand.IgnoreList::%loop-player%.%player%} is not set:
+					send json of "%{skDemand.Prefix::%player%}%&r&f " then "%player's displayname%" tooltip "&6&l&nClick&r &6&lto see options%new line%&6&lthat you can do with:%new line%&b&n%name of player%" run "/chatoptionstooltipruncommand %name of player%" then "&8:&7 %{skDemand.Message::%player%}%" to loop-player
+			#broadcast "%{skDemand.Prefix::%player%}%&r&f %player's displayname%&8:&7 %{skDemand.Message::%player%}%"
+		else:
+			loop all players:
+				if {skDemand.IgnoreList::%loop-player%.%player%} is not set:
+					send json of "&o&l%player's displayname%" tooltip "&6&l&nClick&r &6&lto see options%new line%&6&lthat you can do with:%new line%&b&n%name of player%" run "/chatoptionstooltipruncommand %name of player%" then "&8:&7 %{skDemand.Message::%player%}%" to loop-player
+			#broadcast "&o&l%player's displayname%&8:&7 %{skDemand.Message::%player%}%"
+		set display name of player to name of player
+		stop
+	
+command /chatoptionstooltipruncommand <player>:
+	trigger:
+		set {_player} to arg 1
+		open chest with 5 row named "&r" to player
+		#First row is for communication & information
+		set {_s} to 0
+		if player have permission "skDemand.pm":
+			format slot {_s} of player with paper named "&6Private Message" with lore "&a/pm &b%{_player}% &a<message>" to close then run "sudo %player% /chatoptionstooltipruncommandpm %{_player}%"
+			add 2 to {_s}
+		wait 0.1 ticks
+		if player have permission "skDemand.mail":
+			format slot {_s} of player with book and quill named "&6Mail" with lore "&a/mail send &b%{_player}% &a<message>" to close then run "sudo %player% /chatoptionstooltipruncommandmail %{_player}%"
+			add 2 to {_s}
+		wait 0.1 ticks
+		if player have permission "skDemand.seen":
+			format slot {_s} of player with raw pufferfish named "&6Information about &b%{_player}%" with lore "&a/seen &b%{_player}%" to close then run "sudo %player% /seen %{_player}%"
+			add 2 to {_s}
+		wait 0.1 ticks
+		if player have permission "skDemand.ignore":
+			format slot {_s} of player with redstone torch named "&6Ignore" with lore "&a/ignore &b%{_player}%" to close then run "sudo %player% /ignore %{_player}%"
+			add 2 to {_s}
+		wait 0.1 ticks
+		if player have permission "skDemand.pay":
+			format slot {_s} of player with gold ingot named "&6Pay &b%{_player}%" with lore "&a/pay &b%{_player}% <amount>" to close then run "sudo %player% /chatoptionstooltipruncommandpay %{_player}%"
+			add 2 to {_s}
+		wait 0.1 ticks
+		#Second row for teleportation
+		set {_s} to 9
+		if player have permission "skDemand.tpa":
+			if player doesn't have permission "skDemand.tp":
+				format slot {_s} of player with ender pearl named "&6Tpa" with lore "&a/tpa &b%{_player}%" to close then run "sudo %player% /tpa %{_player}%"
+				add 2 to {_s}
+		wait 0.1 ticks
+		if player have permission "skDemand.tp":
+			format slot {_s} of player with ender pearl named "&6Tp to &b%{_player}%" with lore "&a/tp &b%{_player}%" to close then run "sudo %player% /tp %{_player}%"
+			add 2 to {_s}
+		wait 0.1 ticks
+		if player have permission "skDemand.tpahere":
+			if player doesn't have permission "skDemand.tphere":
+				format slot {_s} of player with eye of ender named "&6Tpahere &b%{_player}%" with lore "&a/tpahere &b%{_player}%" to close then run "sudo %player% /tpahere %{_player}%"
+				add 2 to {_s}
+		wait 0.1 ticks
+		if player have permission "skDemand.tphere":
+			format slot {_s} of player with eye of ender named "&6Tphere &b%{_player}%" with lore "&a/tphere &b%{_player}%" to close then run "sudo %player% /tphere %{_player}%"
+			add 2 to {_s}
+		wait 0.1 ticks
+		#Third & Fourth row for Staffs
+		set {_s} to 18
+		if player have permission "skDemand.sudo":
+			format slot {_s} of player with magma cream named "&6Sudo &b%{_player}%" with lore "&a/sudo &b%{_player}%" to close then run "sudo %player% /chatoptionstooltipruncommandsudo %{_player}%"
+			add 2 to {_s}
+		wait 0.1 ticks
+		if player have permission "skDemand.invsee":
+			format slot {_s} of player with chest named "&6Invsee of &b%{_player}%" with lore "&a/invsee &b%{_player}%" to close then run "sudo %player% /chatoptionstooltipruncommandinvsee %{_player}%"
+			add 2 to {_s}
+		wait 0.1 ticks
+		if player have permission "skDemand.enderchest":
+			format slot {_s} of player with ender chest named "&6Enderchest of &b%{_player}%" with lore "&a/enderchest &b%{_player}%" to close then run "sudo %player% /chatoptionstooltipruncommandenderchest %{_player}%"
+			add 2 to {_s}
+		wait 0.1 ticks
+		if player have permission "skDemand.kill":
+			format slot {_s} of player with redstone named "&6Kill &b%{_player}%" with lore "&a/kill &b%{_player}%" to close then run "sudo %player% /kill %{_player}%"
+			add 2 to {_s}
+		wait 0.1 ticks
+		if player have permission "skDemand.ciother":
+			format slot {_s} of player with dispenser named "&6Clear Inventory of &b%{_player}%" with lore "&a/ci &b%{_player}%" to close then run "sudo %player% /ci %{_player}%"
+			add 2 to {_s}
+		wait 0.1 ticks
+		if player have permission "skDemand.skull.get":
+			format slot {_s} of player with player head named "&6Get the skull of &b%{_player}%" with lore "&a/head &b%{_player}%" to close then run "sudo %player% /head %{_player}%"
+			add 2 to {_s}
+		wait 0.1 ticks
+		if player have permission "skDemand.gmother":
+			format slot {_s} of player with normal sapling named "&6Change &b%{_player}%'s &6gamemode to &aSurvival" with lore "&a/gm 0 &b%{_player}%" to close then run "sudo %player% /gm 0 %{_player}%"
+			add 1 to {_s}
+			format slot {_s} of player with long grass named "&6Change &b%{_player}%'s &6gamemode to &aAdventure" with lore "&a/gm 2 &b%{_player}%" to close then run "sudo %player% /gm 2 %{_player}%"
+			add 1 to {_s}
+			format slot {_s} of player with dead shrub named "&6Change &b%{_player}%'s &6gamemode to &aCreative" with lore "&a/gm 1 &b%{_player}%" to close then run "sudo %player% /gm 1 %{_player}%"
+			add 2 to {_s}
+		wait 0.1 ticks
+		if player have permission "skDemand.flyother":
+			if {skDemand.Fly::%{_player}%} is not set:
+				format slot {_s} of player with hopper named "&6Activate &b%{_player}%'s &6flymode" with lore "&a/fly &b%{_player}%" to close then run "sudo %player% /fly %{_player}%"
+			if {skDemand.Fly::%{_player}%} is set:
+				format slot {_s} of player with hopper named "&6Disable &b%{_player}%'s &6flymode" with lore "&a/fly &b%{_player}%" to close then run "sudo %player% /fly %{_player}%"
+			add 2 to {_s}
+		set {_s} to 36
+		wait 0.1 ticks
+		if player have permission "skDemand.ban":
+			format slot {_s} of player with anvil named "&6Ban &b%{_player}%" with lore "&a/ban &b%{_player}% &6<reason>" to close then run "sudo %player% /chatoptionstooltipruncommandban %{_player}%"
+			add 2 to {_s}
+		wait 0.1 ticks
+		if player have permission "skDemand.tempban":
+			format slot {_s} of player with slightly damaged anvil named "&6Temporary Ban &b%{_player}%" with lore "&a/tempban &b%{_player}% &6<reason> <timespan>" to close then run "sudo %player% /chatoptionstooltipruncommandtempban %{_player}%"
+			add 2 to {_s}
+		wait 0.1 ticks
+		if player have permission "skDemand.mute":
+			format slot {_s} of player with bricks named "&6Mute &b%{_player}%" with lore "&a/mute &b%{_player}% &6<reason>" to close then run "sudo %player% /chatoptionstooltipruncommandmute %{_player}%"
+			add 2 to {_s}
+		wait 0.1 ticks
+		if player have permission "skDemand.tempmute":
+			format slot {_s} of player with brick slab named "&6Temporary Mute &b%{_player}%" with lore "&a/tempmute &b%{_player}% &6<timespan>" to close then run "sudo %player% /chatoptionstooltipruncommandtempmute %{_player}%"
+			add 2 to {_s}
+	
+	
+command /chatoptionstooltipruncommandpm <player>:
+	trigger:
+		send " "
+		send json of "&6&l&nClick&r &6&l&nhere&r &6&l&nto&r &n&o✉&r &b&l&n%arg 1%" tooltip "&6&o&nClick" suggest "/pm %arg 1% " to player
+		send " "
+		
+command /chatoptionstooltipruncommandmail <player>:
+	trigger:
+		send " "
+		send json of "&6&l&nClick&r &6&l&nhere&r &6&l&nto&r &n&oMAIL&r &b&l&n%arg 1%" tooltip "&6&o&nClick" suggest "/mail send %arg 1% " to player
+		send " "
+		
+command /chatoptionstooltipruncommandsudo <player>:
+	trigger:
+		send " "
+		send json of "&6&l&nClick&r &6&l&nhere&r &6&l&nto&r &n&oSUDO&r &b&l&n%arg 1%" tooltip "&6&o&nClick" suggest "/sudo %arg 1% " to player
+		send " "
+		
+command /chatoptionstooltipruncommandinvsee <player>:
+	trigger:
+		wait 5 ticks
+		make player execute command "/invsee %arg 1%"
+		
+command /chatoptionstooltipruncommandenderchest <player>:
+	trigger:
+		wait 5 ticks
+		make player execute command "/enderchest %arg 1%"
+		
+command /chatoptionstooltipruncommandpay <player>:
+	trigger:
+		send " "
+		send json of "&6&l&nClick&r &6&l&nhere&r &6&l&nto&r &n&oPAY&r &b&l&n%arg 1%" tooltip "&6&o&nClick" suggest "/pay %arg 1% " to player
+		send " "
+		
+command /chatoptionstooltipruncommandban <player>:
+	trigger:
+		send " "
+		send json of "&6&l&nClick&r &6&l&nhere&r &6&l&nto&r &n&oBAN&r &b&l&n%arg 1%" tooltip "&6&o&nClick" suggest "/ban %arg 1% " to player
+		send " "
+		
+command /chatoptionstooltipruncommandtempban <player>:
+	trigger:
+		send " "
+		send json of "&6&l&nClick&r &6&l&nhere&r &6&l&nto&r &n&oTEMPBAN&r &b&l&n%arg 1%" tooltip "&6&o&nClick" suggest "/tempban %arg 1% " to player
+		send " "
+		send "&6/tempban <player> <reason> <timespan>"
+		send " "
+		
+command /chatoptionstooltipruncommandmute <player>:
+	trigger:
+		send " "
+		send json of "&6&l&nClick&r &6&l&nhere&r &6&l&nto&r &n&oMUTE&r &b&l&n%arg 1%" tooltip "&6&o&nClick" suggest "/mute %arg 1% " to player
+		send " "
+		
+command /chatoptionstooltipruncommandtempmute <player>:
+	trigger:
+		send " "
+		send json of "&6&l&nClick&r &6&l&nhere&r &6&l&nto&r &n&oTEMPMUTE&r &b&l&n%arg 1%" tooltip "&6&o&nClick" suggest "/tempmute %arg 1% " to player
+		send " "
+		send "&6/tempmute <player> <timespan>"
+		send " "

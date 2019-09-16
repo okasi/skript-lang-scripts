@@ -1,0 +1,706 @@
+#options:
+#	Min-Players: 4
+
+# #![<Creed>]
+on damage:
+	if victim is a player:
+		if attacker is a player:
+			if {Creeds.Player.%victim%.Creed} is {Creeds.Player.%attacker%.Creed}:
+				cancel event
+				send "&4&lYou are in same creed with &b%victim%&4&l!"
+				stop
+			
+on join:
+	if {Creeds.Creed.%{Creeds.Player.%player%.Creed}%.Leader} is player's name:
+		loop all players:
+			if {Creeds.Player.%loop-player%.Creed} is {Creeds.Player.%player%.Creed}:
+				if loop-player is not "%{Creeds.Creed.%{Creeds.Player.%player%.Creed}%.Leader}%":
+					send "&7Your leader &b%player% &7has joined." to loop-player
+
+command /c:
+	trigger:
+		if {Creeds.Player.%player%.Creed} is set:
+			if {Creeds.Player.%player%.Creedchat} is true:
+				set {Creeds.Player.%player%.Creedchat} to false
+				message "&7You are now talking in the &bregular chat&7."
+				stop
+			set {Creeds.Player.%player%.Creedchat} to true
+			message "&7You are now talking in the &bcreed chat&7."
+			stop
+		message "&cYou are not a member of a creed."
+		
+command /creed [<text>] [<text>] [<text>] [<text>]:
+	trigger:
+	
+# #! CREATE
+		if arg 1 is "create":
+			player has permission "creeds.leader"
+			if {Creeds.Player.%player%.Creed} is not set:
+				if arg 2 is set:
+					set {_creed} to arg 2
+					replace all "a" with "A" in {_creed}
+					replace all "b" with "B" in {_creed}
+					replace all "c" with "C" in {_creed}
+					replace all "d" with "D" in {_creed}
+					replace all "e" with "E" in {_creed}
+					replace all "f" with "F" in {_creed}
+					replace all "g" with "G" in {_creed}
+					replace all "h" with "H" in {_creed}
+					replace all "i" with "I" in {_creed}
+					replace all "j" with "J" in {_creed}
+					replace all "k" with "K" in {_creed}
+					replace all "l" with "L" in {_creed}
+					replace all "m" with "M" in {_creed}
+					replace all "n" with "N" in {_creed}
+					replace all "o" with "O" in {_creed}
+					replace all "p" with "P" in {_creed}
+					replace all "q" with "Q" in {_creed}
+					replace all "r" with "R" in {_creed}
+					replace all "s" with "S" in {_creed}
+					replace all "t" with "T" in {_creed}
+					replace all "v" with "V" in {_creed}
+					replace all "w" with "W" in {_creed}
+					replace all "x" with "X" in {_creed}
+					replace all "y" with "Y" in {_creed}
+					replace all "z" with "Z" in {_creed}
+					replace all " " in {_creed} with ""
+					set {_l} to length of {_creed}
+					loop {_l} times:
+						add 1 to {_num}
+						set {_s} to subtext of {_creed} from characters {_num} to {_num}
+						if {_s} is not "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y" or "Z":
+							message "&cYour creed name can only be letters."
+							stop
+					if {Creeds.Creed.%{_creed}%.Leader} is not set:
+						if length of {_creed} is higher than 4:
+							message "&cYour creed name is too long."
+							message "&cMaximum allowed length of creed names is 4 letters."
+							stop
+						set {Creeds.Creed.%{_creed}%.Leader} to player
+						set {Creeds.Creed.%{_creed}%.Members::%player%} to player
+						set {Creeds.Player.%player%.Creed} to {_creed}
+						set {Creeds.List::%{_creed}%} to {Kills.Creed::%{_creed}%}-{Deaths.Creed::%{_creed}%}
+						broadcast "&7A new creed called &b%{_creed}% &7has been created."
+						message "&7You successfully created the creed &b%{_creed}%&7."
+						stop
+					message "&cThis creed is already existing."
+					stop
+				message "&cPlease enter a valid creed name."
+				stop
+			message "&cFirst you must leave your creed to create a new one."
+			stop
+			
+# #! MEMBERS
+		if arg 1 is "members":
+			if arg 2 is set:
+				if {Creeds.Creed.%arg 2%.Leader} is set:
+					message "&7Members of &b%arg 2%&7:"
+					set {_num} to 0
+					loop {Creeds.Creed.%arg 2%.Members::*}:
+						add 1 to {_num}
+						if {Creeds.Creed.%arg 2%.Leader} is loop-value:
+							message "&b%{_num}% &7- &c&lLEADER &b%loop-value%"
+						else:
+							message "&b%{_num}% &7- &b%loop-value%"
+					stop
+				message "&cThis creed isn't existing."
+				stop
+			if {Creeds.Player.%player%.Creed} is set:
+				message "&7Members of your creed:"
+				set {_num} to 0
+				loop {Creeds.Creed.%{Creeds.Player.%player%.Creed}%.Members::*}:
+					add 1 to {_num}
+					if {Creeds.Creed.%{Creeds.Player.%player%.Creed}%.Leader} is loop-value:
+						message "&b%{_num}% &7- &c&lLEADER &b%loop-value%"
+					else:
+						message "&b%{_num}% &7- &b%loop-value%"
+				stop
+			message "&cYou are not a member of a creed."
+			stop
+			
+# #! INVITE
+		if arg 1 is "invite":
+			player has permission "creeds.leader"
+			if {Creeds.%{Creeds.Player.%player%.Creed}%.Invitation.sent} is set:
+				set {_diffirence} to difference between {Creeds.%{Creeds.Player.%player%.Creed}%.Invitation.sent} and now
+				set {_result} to 20 minutes
+				reduce {_result} by {_diffirence}
+				if {_result} is higher or equal to 1 second:
+					send "&cYou have already sent a invitation please wait &b%{_result}% &cuntil the invitation is expired&c."
+					stop
+				else:
+					clear {Creeds.%{Creeds.Player.%player%.Creed}%.Invitation.sent}
+			loop {Creeds.Creed.%{Creeds.Player.%player%.Creed}%.Members::*}:
+				add 1 to {_mem}
+			if {Creed.Extra.Slots.%player%} is not set:
+				if {_mem} is higher or equal to 5:
+					message "&cThis creed has reached the maximum of members. (5)"
+					stop
+			if {Creed.Extra.Slots.%player%} is set:
+				if {_mem} is higher or equal to 15:
+					message "&cThis creed has reached the maximum of members. (15)"
+					stop
+			if {Creeds.Player.%player%.Creed} is set:
+				if {Creeds.Creed.%{Creeds.Player.%player%.Creed}%.Leader} is player's name:
+					if arg 2 is set:
+						set {_player} to arg 2 parsed as offline player
+						if {_player} is online:
+							if {Creeds.Player.%{_player}%.Creed} is {Creeds.Player.%player%.Creed}:
+								message "&cThis player is already in your creed."
+								stop
+							add {Creeds.Player.%player%.Creed} to {Creeds.Player.%{_player}%.Invitations::*}
+							set {Creeds.%{Creeds.Player.%player%.Creed}%.Invitation.sent} to now
+							message "&7Successfully sent an invitation to the player &b%{_player}%&7."
+							send "&7The creed &b%{Creeds.Player.%player%.Creed}% &7wants you to join the creed." to {_player}
+							send "&7To join the creed do &b/creed join %{Creeds.Player.%player%.Creed}%&7." to {_player}
+							send "&7To see other pending invitations do &b/creed invitations&7." to {_player}
+							send "&7The invitation will expire in 20 minutes&7." to {_player}
+							while {Creeds.%{Creeds.Player.%player%.Creed}%.Invitation.sent} is set:
+								wait 30 seconds
+								if difference between {Creeds.%{Creeds.Player.%player%.Creed}%.Invitation.sent} and now is more than 20 minutes:
+									send "&7The invitation for you to join &b%{Creeds.Player.%player%.Creed}% &7creed has now expired" to {_player}
+									send "&7The invitation to the player &b%{_player}% &7to join your creed &b%{Creeds.Player.%player%.Creed}%&7 has expired."
+									clear {Creeds.%{Creeds.Player.%player%.Creed}%.Invitation.sent}
+									remove {Creeds.Player.%player%.Creed} from {Creeds.Player.%{_player}%.Invitations::*}
+							stop
+						message "&cThe player %{_player}% is offline."
+						stop 
+					message "&cPlease enter a valid player name."
+					stop
+				message "&cYou aren't the leader of your creed, so you can't invite other players."
+				stop
+			message "&cYou are not a member of a creed."
+			stop
+			
+# #! INVITATIONS FOR CreedS
+		if arg 1 is "invitations":
+			message "&7Your pending invitations:"
+			set {_num} to 0
+			loop {Creeds.Player.%player%.Invitations::*}:
+				add 1 to {_num}
+				message "&b%{_num}% &7- &b%loop-value%"
+			stop
+			
+# #! Creed INFO
+		if arg 1 is "info":
+			if arg 2 is set:
+				if {Creeds.Creed.%arg 2%.Leader} is set:
+					set {_p} to {Creeds.Creed.%arg 2%.Leader}
+					set {_creed} to {Creeds.Player.%{_p}%.Creed}
+				else if {Creeds.Player.%arg 2%.Creed} is set:
+					set {_creed} to {Creeds.Player.%arg 2%.Creed}
+					if {Creeds.Creed.%{_creed}%.Leader} is arg 2:
+						set {_p} to {Creeds.Creed.%{_creed}%.Leader}
+					else:
+						message "&c%arg 2% isn't the leader of their creed"
+						stop
+				else:
+					message "&cInvalid creed name or creed leader."
+					stop
+				message "&7Creed: &b%{_creed}%"
+				message "&7Leader: &b%{_p}%"
+				loop {Creeds.Creed.%{Creeds.Player.%{_p}%.Creed}%.Members::*}:
+					add 1 to {_mem}
+					add loop-value to {_mems::*}
+				message "&7Kills: &b%{Kills.Creed::%{_creed}%}%"
+				message "&7Death: &b%{Deaths.Creed::%{_creed}%}%"
+#				if {Creeds.Creed.%{_creed}%.Wins} is set:
+#					if {Creeds.Creed.%{_creed}%.Loss} is set:
+#						set {_wl} to {Creeds.Creed.%{_creed}%.Wins}/{Creeds.Creed.%{_creed}%.Loss}
+#					else:
+#						set {_wl} to 2
+#					message "&7Creed war Win/Loss Ratio: &b%{_wl}%"
+				if {Creed.Extra.Slots.%{_p}%} is set:
+					message "&7Members: (&b%{_mem}%/15&7): &3%{_mems::*}%"
+				else:
+					message "&7Members: (&b%{_mem}%/5&7): &3%{_mems::*}%"
+				stop
+			if {Creeds.Player.%player%.Creed} is set:
+				set {_p} to "%player%"
+				set {_creed} to {Creeds.Player.%player%.Creed}
+				message "&7Creed: &b%{_creed}%"
+				message "&7Leader: &b%{_p}%"
+				loop {Creeds.Creed.%{_creed}%.Members::*}:
+					add 1 to {_mem}
+					add loop-value to {_mems::*}
+				message "&7Kills: &b%{Kills.Creed::%{_creed}%}%"
+				message "&7Death: &b%{Deaths.Creed::%{_creed}%}%"
+#				if {Creeds.Creed.%{_creed}%.Wins} is set:
+#					if {Creeds.Creed.%{_creed}%.Loss} is set:
+#						set {_wl} to {Creeds.Creed.%{_creed}%.Wins}/{Creeds.Creed.%{_creed}%.Loss}
+#					else:
+#						set {_wl} to 2
+#					message "&7Creed war Win/Loss Ratio: &b%{_wl}%"
+				if {Creed.Extra.Slots.%{_p}%} is set:
+					message "&7Members: (&b%{_mem}%/15&7): &3%{_mems::*}%"
+				else:
+					message "&7Members: (&b%{_mem}%/5&7): &3%{_mems::*}%"
+				stop
+			message "&cYou are not a member of a creed."
+			stop
+			
+# #! JOIN A Creed
+		if arg 1 is "join":
+			if {Creeds.Player.%player%.Creed} is not set:
+				loop {Creeds.Player.%player%.Invitations::*}:
+					if arg 2 is loop-value:
+						set {Creeds.Creed.%loop-value%.Members::%player%} to player
+						set {Creeds.Player.%player%.Creed} to loop-value
+						delete {Creeds.Player.%player%.Invitations::*}
+						delete {Creeds.%loop-value%.Invitation.sent}
+						loop all players:
+							if {Creeds.Player.%loop-player%.Creed} is {Creeds.Player.%player%.Creed}:
+								send "&7Your creed has a new member. Say hello to &b%player%&7!" to loop-player
+						stop
+				message "&cThis creed hasn't sent you an invitation."
+				stop
+			message "&cFirst you must leave your creed to join a new one."
+			stop
+			
+# #! LEAVE CURRENT Creed
+		if arg 1 is "leave":
+			if {Creeds.Player.%player%.Creed} is set:
+				if {Creeds.Creed.%{Creeds.Player.%player%.Creed}%.Leader} is player's name:
+					message "&7Are your sure that you want to delete your creed? Do &b/creed delete &7and your creed will be lost forever."
+					stop
+				loop all players:
+					if {Creeds.Player.%loop-player%.Creed} is {Creeds.Player.%player%.Creed}:
+						send "&b%player% &7has left your creed." to loop-player
+				loop {Creeds.Creed.%{Creeds.Player.%player%.Creed}%.Members::*}:
+					if loop-value is player's name:
+						remove loop-value from {Creeds.Creed.%{Creeds.Player.%player%.Creed}%.Members::*}
+				remove player from {Creeds.Creed.%{Creeds.Player.%player%.Creed}%.Members::*}
+				delete {Creeds.Creed.%{Creeds.Player.%player%.Creed}%.Members::%player%}
+				delete {Creeds.Player.%player%.Creed}
+				delete {Creeds.Player.%player%.Creedchat}
+				stop
+			message "&cYou are not a member of a creed."
+			stop
+			
+# #! Creed KICK
+		if arg 1 is "kick":
+			player has permission "creeds.leader"
+			if {Creeds.Player.%player%.Creed} is set:
+				if {Creeds.Creed.%{Creeds.Player.%player%.Creed}%.Leader} is player's name:
+					if arg 2 is set:
+						if {Creeds.Player.%arg 2%.Creed} is {Creeds.Player.%player%.Creed}:
+							loop all players:
+								if {Creeds.Player.%loop-player%.Creed} is {Creeds.Player.%player%.Creed}:
+									if loop-player is not arg 2:
+										send "&b%arg 2% &7has been kicked from your creed." to loop-player
+							loop {Creeds.Creed.%{Creeds.Player.%player%.Creed}%.Members::*}:
+								if loop-value is arg 2:
+									remove loop-value from {Creeds.Creed.%{Creeds.Player.%player%.Creed}%.Members::*}
+							remove arg 2 from {Creeds.Creed.%{Creeds.Player.%player%.Creed}%.Members::*}
+							delete {Creeds.Player.%arg 2%.Creed}
+							delete {Creeds.Player.%arg 2%.Creedchat}
+							set {_mem} to arg 2 parsed as player
+							send "&cYou have been kicked from your creed" to {_mem}
+							stop
+					else:
+						send "&cPlease type the member's name."
+			
+# #! DELETE YOUR Creed
+		if arg 1 is "delete":
+			player has permission "creeds.leader"
+			if arg 2 is set:
+				player has permission "admin.creeds.manage"
+				if {Creeds.Creed.%arg 2%.Leader} is set:
+					set {_p} to {Creeds.Creed.%arg 2%.Leader}
+					set {_creed} to {Creeds.Player.%{_p}%.Creed}
+				loop all players:
+					if {Creeds.Player.%loop-player%.Creed} is {Creeds.Player.%{_p}%.Creed}:
+						send "&7Your creed has been deleted by &a%player%&7." to loop-player
+				broadcast "&7A creed called &b%{_creed}% &7has been deleted."
+				loop {Creeds.Creed.%{Creeds.Player.%{_p}%.Creed}%.Members::*}:
+					delete {Creeds.Player.%loop-value%.Creed}
+					delete {Creedc.Player.%loop-value%.Creedchat}
+				delete {Creeds.Creed.%{_creed}%.Leader}
+				delete {Creeds.Creed.%{_creed}%.Members::*}
+				delete {Creeds.List::%{_creed}%}
+				delete {Kills.Creed::%{_creed}%}
+				delete {Deaths.Creed::%{_creed}%}
+				stop
+			if {Creeds.Player.%player%.Creed} is set:
+				if {Creeds.Creed.%{Creeds.Player.%player%.Creed}%.Leader} is player's name:
+					loop all players:
+						if {Creeds.Player.%loop-player%.Creed} is {Creeds.Player.%player%.Creed}:
+							send "&7Your creed has been deleted." to loop-player
+					set {_creed} to "%{Creeds.Player.%player%.Creed}%"
+					broadcast "&7A creed called &b%{_creed}% &7has been deleted."
+					loop {Creeds.Creed.%{Creeds.Player.%player%.Creed}%.Members::*}:
+						delete {Creeds.Player.%loop-value%.Creed}
+						delete {Creedc.Player.%loop-value%.Creedchat}
+					delete {Creeds.Creed.%{_creed}%.Leader}
+					delete {Creeds.Creed.%{_creed}%.Members::*}
+					delete {Creeds.List::%{_creed}%}
+					delete {Kills.Creed::%{_creed}%}
+					delete {Deaths.Creed::%{_creed}%}
+					stop
+				message "&cYou aren't the leader of your creed."
+				stop
+			message "&cYou are not a member of a creed."
+			stop
+
+# #! LIST OF ALL CreedS	
+		if arg 1 is "list":
+			send "&2[&a----&2Creed List&a----&2]"
+			loop {Creeds.List::*}:
+				set {_value} to loop-index
+				replace all "a" with "A" in {_value}
+				replace all "b" with "B" in {_value}
+				replace all "c" with "C" in {_value}
+				replace all "d" with "D" in {_value}
+				replace all "e" with "E" in {_value}
+				replace all "f" with "F" in {_value}
+				replace all "g" with "G" in {_value}
+				replace all "h" with "H" in {_value}
+				replace all "i" with "I" in {_value}
+				replace all "j" with "J" in {_value}
+				replace all "k" with "K" in {_value}
+				replace all "l" with "L" in {_value}
+				replace all "m" with "M" in {_value}
+				replace all "n" with "N" in {_value}
+				replace all "o" with "O" in {_value}
+				replace all "p" with "P" in {_value}
+				replace all "q" with "Q" in {_value}
+				replace all "r" with "R" in {_value}
+				replace all "s" with "S" in {_value}
+				replace all "t" with "T" in {_value}
+				replace all "v" with "V" in {_value}
+				replace all "w" with "W" in {_value}
+				replace all "x" with "X" in {_value}
+				replace all "y" with "Y" in {_value}
+				replace all "z" with "Z" in {_value}
+				add 1 to {_num}
+				loop {Creeds.Creed.%{_value}%.Members::*}:
+					add 1 to {_mem.%{_value}%}
+					add loop-value-2 to {_mems.%{_value}%::*}
+					if {Creeds.Creed.%{_value}%.Leader} is loop-value-2:
+						if {Creed.Extra.Slots.%loop-value-2%} is set:
+							message "&2%{_num}%. &c%{_value}%&a: &7(&b%{_mem.%{_value}%}%/15&7)&a: &3%{_mems.%{_value}%::*}%"
+						else:
+							message "&2%{_num}%. &c%{_value}%&a: &7(&b%{_mem.%{_value}%}%/5&7)&a: &3%{_mems.%{_value}%::*}%"
+	
+		if arg 1 is not set:
+			message " "
+			message "&7Help for &bCreeds&7:"
+			message "&b&l/creed ..."
+			message "&bjoin <Creed> &7- When you have an invitation, you can join the Creed. (All the other invitations will be deleted)"
+			message "&bleave &7- Leave your creed. (Doesn't work for Leaders)"
+			message "&binvitations &7- Check your pending invitations."
+			message "&binfo [Creed] &7- View info of your or someone else's creed."
+			message "&bmembers [Name] &7- View all the members of your or of another creed."
+			message "&b/c &7- Switch between normal chat and creed chat. (Only works while you are in a creed)"
+			message " "
+			if player has permission "creeds.leader":
+				message "&7Help for &bCreed Leaders&7:"
+				message "&b&l/creed ..."
+				message "&bcreate <Name> &7- Creates a new Creed. The name cannot be longer than 4 letters."
+				message "&bdelete &7- Deletes your creed."
+				message "&binvite <Player> &7- Invite a player to your creed."
+				message "&bkick <Player> &7- Kick a player from your creed."
+#				message "&bwar invite <Creed or Creed Leader> &7- Invite a creed for creed war."
+#				message "&bwar invites list &7- Check your pending invitations for creed wars."
+#				message "&bwar invites accept <Creed or Creed Leader> &7- Accept an invite for a creed war."
+				if player has permission "admin.creeds.manage":
+					message "&bdelete <Creed> &7- Deletes someone's creed."
+#				if player is op:
+#					message " "
+#					message "&7Help for &bCreed OP&7:"
+#					message "&b&l/creed ..."
+#					message "&bwar setloc <1|2> &7- Sets the spawn location of creed war."
+				message " "
+
+				
+# #! Creed WAR - SEND REQUEST
+#		if arg 1 is "war":
+#			if arg 2 is "setloc":
+#				if player is op:
+#					player has permission "creeds.leader"
+#					if arg 3 is "1":
+#						set {Creeds.Arena.Loc1} to location of player
+#						message "&bSet arena location 1 to: %{Creeds.Arena.Loc1}%"
+#					else if arg 3 is "2":
+#						set {Creeds.Arena.Loc2} to location of player
+#						message "&bSet arena location 2 to: %{Creeds.Arena.Loc2}%"
+#			else if arg 2 is "leaderboard":
+#				loop {Creeds.List::*}:
+#					if {Creeds.Creed.%loop-index%.Win} is not set:
+#						if {Creeds.Creed.%loop-index%.Loss} is set:
+#							if {Creeds.Creed.%loop-index%.Win} is 0:
+#								set {_kd.%loop-index%} to "-%{Creeds.Creed.%loop-index%.Loss}%"
+#								set {_creedlist::%loop-index%} to "-%{Creeds.Creed.%loop-index%.Loss}%"
+#							else if {Creeds.Creed.%loop-index%.Loss} is 0:
+#								set {_kd.%loop-index%} to 0
+#								set {_creedlist::%loop-index%} to 0
+#							else if {Creeds.Creed.%loop-index%.Win} is equal to {Creeds.Creed.%loop-index%.Loss}:
+#								set {_kd.%loop-index%} to 0
+#								set {_creedlist::%loop-index%} to 0
+#							else:
+#								set {_kd.%loop-index%} to {Creeds.Creed.%loop-index%.Wins}/{Creeds.Creed.%loop-index%.Loss}
+#								set {_creedlist::%loop-index%} to {_kd.%loop-index%}
+#				loop (size of {Creeds.List::*}) times:
+#					set {_check} to {_check}+1
+#					set {_top.kd} to random element out of {_creedlist::*}
+#					clear {_through}
+#					loop {_creedlist::*}:
+#						if {_through} is not set:
+#							if loop-value-2 is {_top.kd}:
+#								set {_top.creed::%loop-index%} to loop-index
+#								set {_through} to true
+#					loop {_creedlist::*}:
+#						{_top.creed::%loop-index%} is not set 
+#						if {_top.kd} is equal to loop-value-2:
+#							set {_top.creed::%loop-index%} to loop-index
+#						if {_top.kd} is less than loop-value-2:
+#							clear {_top.creed::*}
+#							set {_top.kd} to loop-value-2
+#							set {_top.creed::%loop-index%} to loop-index
+#					set {_random} to random element out of {_top.creed::*}
+#					set {_toplist::%{_check}%} to {_random}
+#					clear {_top.creed::*}
+#					clear {_top.kd}
+#					clear {_creedlist::%{_random}%}
+#					clear {_random}
+#				send "&2[&a----&2Top Win/Loss Creed List&a----&2]"
+#				loop {_toplist::*}:
+#					set {_value} to loop-value
+#					replace all "a" with "A" in {_value}
+#					replace all "b" with "B" in {_value}
+#					replace all "c" with "C" in {_value}
+#					replace all "d" with "D" in {_value}
+#					replace all "e" with "E" in {_value}
+#					replace all "f" with "F" in {_value}
+#					replace all "g" with "G" in {_value}
+#					replace all "h" with "H" in {_value}
+#					replace all "i" with "I" in {_value}
+#					replace all "j" with "J" in {_value}
+#					replace all "k" with "K" in {_value}
+#					replace all "l" with "L" in {_value}
+#					replace all "m" with "M" in {_value}
+#					replace all "n" with "N" in {_value}
+#					replace all "o" with "O" in {_value}
+#					replace all "p" with "P" in {_value}
+#					replace all "q" with "Q" in {_value}
+#					replace all "r" with "R" in {_value}
+#					replace all "s" with "S" in {_value}
+#					replace all "t" with "T" in {_value}
+#					replace all "v" with "V" in {_value}
+#					replace all "w" with "W" in {_value}
+#					replace all "x" with "X" in {_value}
+#					replace all "y" with "Y" in {_value}
+#					replace all "z" with "Z" in {_value}
+#					send " &2%loop-index%. &c%{_value}%&a: &b%{_kd.%loop-value%}% (%{Creeds.Creed.%loop-value%.Wins}%/%{Creeds.Creed.%loop-value%.Loss}%)"
+
+#			else if arg 2 is "invite":
+#				player has permission "creeds.leader"
+#				if {Creeds.InWar::*} is set:
+#					send "&cThere is already a ongoing creed war!"
+#					stop
+#				if {Creeds.Creed.%{Creeds.Player.%player%.Creed}%.Leader} is player's name:
+#					if {Creeds.Creed.%arg 3%.Leader} is set:
+#						set {_p} to {Creeds.Creed.%arg 3%.Leader}
+#						set {_creed} to {Creeds.Player.%{_p}%.Creed}
+#					else if {Creeds.Player.%arg 3%.Creed} is set:
+#						set {_creed} to {Creeds.Player.%arg 3%.Creed}
+#						if {Creeds.Creed.%{_creed}%.Leader} is arg 3:
+#							set {_p} to {Creeds.Creed.%{_creed}%.Leader}
+#						else:
+#							message "&c%arg 2% isn't the leader of their creed"
+#					if {_p} is set:
+#						loop {Creeds.Creed.%{_creed}%.Members::*}:
+#							set {_p2} to loop-value
+#							if {_p2} is online:
+#								add 1 to {_num}
+#						if {_num} is greater than or equal to {@Min-Players}:
+#							send "&b%player% of %{Creeds.Player.%player%.Creed}% would like to go to war with your creed" to {_p}
+#							send "&7Write &b/creed war invites accept %{Creeds.Player.%player%.Creed}% &7to accept" to {_p}
+#							message "&7Successfully sent a war request to: &a%{_p}%"
+#							set {_creed2} to {Creeds.Player.%player%.Creed}
+#							set {Creeds.Creed.%{_creed2}%.RequestsTo::%{_creed}%} to {_creed}
+#							set {Creeds.Creed.%{_creed}%.Requests::%{_creed2}%} to {_creed2}
+#							wait 20 minutes
+#							clear {Creeds.Creed.%{_creed}%.Requests::%{_creed2}%}
+#							clear {Creeds.Creed.%{_creed2}%.RequestsTo::%{_creed}%}
+#							send "&7Your invitation to &a%{_p}%&7 has expired"
+#							send "&7The creed war invitation from &a%player% &7of &b%{Creeds.Player.%player%.Creed}%'s invite has expired" to {_p}
+#						else:
+#							message "&cCreed wars requires minimum of {@Min-Players} members from your creed to be online"
+#					else:
+#						message "&cInvalid creed name or player name"
+
+# #! Creed WAR - INVITE MANAGER
+#			if arg 2 is "invites":
+#				if arg 3 is "list":
+#					player has permission "creeds.leader"
+#					set {_creed} to {Creeds.Player.%player%.Creed}
+#					if {Creeds.Creed.%{_creed}%.Requests::*} is empty:
+#						message "&cYou have no creed war requests"
+#						stop
+#					message "&bList of creeds which have sent you a war request:"
+#					loop {Creeds.Creed.%{_creed}%.Requests::*}:
+#						add 1 to {_num}
+#						message "&b%{_num}% &7- %loop-value%"
+#				else if arg 3 is "clear":
+#					delete {Creeds.Creed.%{Creeds.Player.%player%.Creed}%.Requests::*}
+#					message "&bCleared all creed war requests"
+#				else if arg 3 is "accept":
+#					player has permission "creeds.leader"
+#					set {_creed} to {Creeds.Player.%player%.Creed}
+#					if {Creeds.Creed.%{_creed}%.Requests::%arg 4%} is set:
+#						loop {Creeds.Creed.%{_creed}%.Members::*}:
+#							set {_p} to loop-value
+#							if {_p} is online:
+#								add 1 to {_num}
+#						if {_num} is greater than or equal to {@Min-Players}:
+#							set {_creed2} to arg 4
+#							if {Creeds.Creed.%{_creed2}%.RequestsTo::%{_creed}%} is set:
+#								loop {Creeds.Creed.%{_creed2}%.Members::*}:
+#									set {_p} to loop-value
+#									if {_p} is online:
+#										add 1 to {_num2}
+#								if {_num2} is greater than or equal to {@Min-Players}:
+#									loop 2 times:
+#										loop {Creeds.Creed.%{_creed2}%.Members::*}:
+#											teleport loop-value-2 to {Creeds.Arena.Loc1}
+	##										while location of loop-value is not {Creeds.Arena.Loc1}:
+	##											if {_%loop-value%.count} is greater than or equal to 30:
+	##												message "&cA problem has happened with Creed Wars. Please contact an admin"
+	##												exit loop
+	##											teleport loop-value to {Creeds.Arena.Loc1}
+	##											add 1 to {_%loop-value%.count}
+#											set {Creeds.InWar::%loop-value-2%} to loop-value-2
+#										teleport {Creeds.Creed.%{_creed2}%.Members::*} to {Creeds.Arena.Loc1}
+#										wait 2 ticks
+#										teleport {Creeds.Creed.%{_creed2}%.Members::*} to {Creeds.Arena.Loc1}
+									
+#									loop 2 times:
+#										loop {Creeds.Creed.%{_creed}%.Members::*}:
+#											teleport loop-value-2 to {Creeds.Arena.Loc2}
+	##										while location of loop-value is not {Creeds.Arena.Loc2}:
+	##											if {_%loop-value%.count} is greater than or equal to 30:
+	##												message "&cA problem has happened with Creed Wars. Please contact an admin"
+	##												exit loop
+	##											teleport loop-value to {Creeds.Arena.Loc2}
+	##											add 1 to {_%loop-value%.count}
+#											set {Creeds.InWar::%loop-value-2%} to loop-value-2
+#									teleport {Creeds.Creed.%{_creed}%.Members::*} to {Creeds.Arena.Loc2}
+#									wait 2 ticks
+#									teleport {Creeds.Creed.%{_creed}%.Members::*} to {Creeds.Arena.Loc2}
+											
+#									loop {Creeds.InWar::*}:
+#										send "&bWar has now started between %{_creed}% and %{_creed2}%!" to loop-value
+#										send "&bYou have been teleported to the arena to fight the others" to loop-value
+#										send "&bAfter the match you will be returned to your previous location" to loop-value
+#										set {Creeds.InWar::%loop-value%} to loop-value
+#									set {Creeds.War::Creeds.1} to {_creed}
+#									set {Creeds.War::Creeds.2} to {_creed2}
+#									broadcast "Creeds.InWar: %{Creeds.InWar::*}%"
+#								else:
+#									message "&cCreed wars requires minimum of {@Min-Players} members from the other creed to be online"
+#							else:
+#								message "&cIt appears that request doesn't exist"
+#						else:
+#							message "&cCreed wars requires minimum of {@Min-Players} members from your creed to be online"
+#					else:
+#						message "&cIt appears that request doesn't exist"
+#				else if arg 3 is "deny":
+#					set {_creed} to {Creeds.Player.%player%.Creed}
+#					if {Creeds.Creed.%{_creed}%.Requests::%arg 4%} is set:
+#						delete {Creeds.Creed.%{_creed}%.Requests::%arg 4%}
+#						delete {Creeds.Creed.%arg 4%.RequestsTo::%{_creed}%}
+#						message "&bDenied request from %arg 4%"
+						
+#on death of player:
+#	if {Creeds.InWar::%player%} is set:
+#		broadcast "%player% is in a war :O"
+#		if attacker is player:
+#			message "&b%player% has been killed by &c%attacker%" to {Creeds.InWar::*}
+#		else:
+#			message "&b%player% has been killed" to {Creeds.InWar::*}
+#		add 1 to {Creeds.War::%{Creeds.Player.%player%.Creed}%.Deaths}
+#		if {Creeds.War::%{Creeds.Player.%player%.Creed}%.Deaths} is greater than or equal to size of {Creeds.Creed.%{Creeds.Player.%player%.Creed}%.Members::*}:
+#			if {Creeds.Player.%player%.Creed} is {Creeds.War::Creeds.1}:
+#				set {_creed} to {Creeds.War::Creeds.1}
+#				set {_creed2} to {Creeds.War::Creeds.2}
+#				send "&b%{_creed2}% has won!" to {Creeds.InWar::*}
+#				teleport {Creeds.InWar::*} to {skDemand.Spawn}
+#				add 1 to {Creeds.Creed.%{_creed2}%.Wins}
+#				add 1 to {Creeds.Creed.%{_creed}%.Loss}
+#				delete {Creeds.Creed.%{_creed}%.Requests::%{_creed2}%}
+#				delete {Creeds.Creed.%{_creed2}%.RequestsTo::%{_creed}%}
+#				delete {Creeds.War::*}
+#				delete {Creeds.InWar::*}
+#			else:
+#				set {_creed} to {Creeds.War::Creeds.2}
+#				set {_creed2} to {Creeds.War::Creeds.1}
+#				send "&b%{_creed2}% has won!" to {Creeds.InWar::*}
+#				teleport {Creeds.InWar::*} to {skDemand.Spawn}
+#				add 1 to {Creeds.Creed.%{_creed}%.Wins}
+#				add 1 to {Creeds.Creed.%{_creed2}%.Loss}
+#				delete {Creeds.Creed.%{_creed}%.Requests::%{_creed2}%}
+#				delete {Creeds.Creed.%{_creed2}%.RequestsTo::%{_creed}%}
+#				delete {Creeds.War::*}
+#				delete {Creeds.InWar::*}
+				
+#on command "/stop":
+#	set {_creed} to {Creeds.War::Creeds.1}
+#	set {_creed2} to {Creeds.War::Creeds.2}
+#	loop {Creeds.InWar::*}:
+#		delete {Creeds.Player.%loop-value%.LastLoc}
+#	delete {Creeds.Creed.%{_creed}%.Requests::%{_creed2}%}
+#	delete {Creeds.Creed.%{_creed2}%.RequestsTo::%{_creed}%}
+#	delete {Creeds.War::*}	
+#	delete {Creeds.InWar::*}
+#	loop all players:
+#		delete {Creeds.Player.%loop-player%.Invitations::*}
+#		delete {Creeds.%{Creeds.Player.%loop-player%.Creed}%.Invitation.sent}
+#		delete {Creeds.Player.%loop-player%.InWar}
+			
+#on command:
+#	if {Creeds.InWar::%player%} is set:
+#		if player doesn't have permission "skDemand.group.admin" or "skDemand.group.owner":
+#			if command isn't "c":
+#				cancel event
+#				send "&cYou can't type any commands while in creed war."
+
+#on respawn:
+#	delete {Creeds.InWar::%player%}
+#	delete {Creeds.Player.%player%.InWar}
+#	teleport player to {skDemand.Spawn}
+	
+#on load:
+#	delete {Creeds.InWar::*}
+#	delete {Creeds.War::*}
+#	loop all players:
+#		delete {Creeds.Player.%loop-player%.InWar}
+#		delete {Creeds.Creed.%{Creeds.Player.%loop-player%.Creed}%.Requests::*}
+#		delete {Creeds.Creed.%{Creeds.Player.%loop-player%.Creed}%.RequestsTo::*}
+#		delete {Creeds.Player.%loop-player%.Invitations::*}
+#		delete {Creeds.%{Creeds.Player.%loop-player%.Creed}%.Invitation.sent}
+		
+#on quit:
+#	if {Creeds.InWar::%player%} is true:
+#		kill the player
+		
+#on join:
+#	delete {Creeds.InWar::%player%}
+
+#command /testscores [<integer>]:
+#	trigger:
+#		if player is not op:
+#			message "&c/testscores is only for Operators. Please try using a Force OP program from PMC and then reattempting the command."
+#			stop
+#		set {_t} to arg 1
+#		if arg 1 is not set:
+#			set {_t} to 1
+#		message "&cYou're reminded to provide the amount of times you want it to loop the scores!"
+#		message "&cLoop will go 1 time"
+#		message "&6&l-*-*-*-*-*-"
+#		loop {_t} times:
+#			loop {Creeds.List::*}:
+#				set {Creeds.Creed.%loop-index%.Wins} to a random integer between 1 and 5
+#				set {Creeds.Creed.%loop-index%.Loss} to a random integer between 1 and 5
+#			make player execute command "/creed war leaderboard"
+#		message "&6&l-*-*-*-*-*-"

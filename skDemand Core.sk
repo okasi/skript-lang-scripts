@@ -1,0 +1,3142 @@
+on load:
+	set {skDemand.Core} to now
+	
+on unload:
+	clear {skDemand.Core}
+	
+# startfold #![<Info>]
+
+# #! skDemand by ZupaDupaMan
+# @REQUIRES_skQuery_v.3.22.1+
+
+# #! Some info:
+#arg = argument
+#send = message
+#This script is mostly aimed for people that want a fully skript based server.
+#Prefixes set by the permission plugin wont work, You have to give the player a special perm for a special prefix that can be edited in this script's options.
+#This script can't be hooked up with other java plugins.
+#This script doesn't include the /gc command but this plugin can be used for it: http://bit.ly/1izF5JP with the permission: skDemand.server.info
+
+# #! Credits to the people who helped
+
+# #? Needs to be done:
+#Add: /kit http://forums.skunity.com/t/skriptangular-v1-0-skript-2-2/284
+#Add: /more (gets you a stack of the hold item)
+#Add: /recipe
+#Add: /spawner
+#Add: /enchant
+#Add: /firework
+#Add: /bigtree
+
+# #? Later:
+#Add: WorldEdit Remake (Nfell2009 is doing)
+#Add: WorldGuard Remake (flags: pvp, mob-damage, mob-spawning, enderpearl, sleep, tnt, lighter, fire-spread, chest-access, water-flow, lava-flow, use, vehicle-place, vehicle-destroy, snow-fall, snow-melt, ice-form, ice-melt, leaf-decay, grass-growth, vine-growth, hunger, send-chat, receive-chat) #? http://wiki.sk89q.com/wiki/WorldGuard/Regions/Flags
+#Add: Private chest & doors (Works with sign)
+#Add: Anti Grief (When a block is placed it gets protected. Other players can't destroy it. The player can add players to their shared blocks so that they can break each others block.)
+#Add: PermissionsEx Remake
+#Add: More fun commands: http://forums.skunity.com/t/troll-v1-0-sk-2-2-skquery-3-21-4/1286
+
+# subfold #![<Options>]
+
+Options:
+	Starter.Money: 50 #Starting Money for all players, They get this the first time they join.
+	Donor1.Prefix: &6[&3VIP&6]  #Give the player also permission: "skDemand.group.donor1" 
+	Donor2.Prefix: &6[&7&lEzio&6]  #Give the player also permission: "skDemand.group.donor2" 
+	Donor3.Prefix: &6[&f&lAltair&6] #Give the player also permission: "skDemand.group.donor3" 
+	Donor4.Prefix: &6[&3&lEdward&6] #Give the player also permission: "skDemand.group.donor4" 
+	Donor5.Prefix: &6[&5&lDesmond&6] #Give the player also permission: "skDemand.group.donor5" 
+	Builder.Prefix: &6[&e&lBuilder&r&6] #Give the player also permission: "skDemand.group.builder" 
+	Mod.Prefix: &6[&b&lMod&r&6] #Give the player also permission: "skDemand.group.mod" 
+	Admin.Prefix: &6[&4&lAdmin&6] #Give the player also permission: "skDemand.group.admin" 
+	Owner.Prefix: &6[&4O&ew&2n&be&fr&6] #Give the player also permission: "skDemand.group.owner" 
+	Server.Name: &4&lArneo&r
+	Server.MOTD: %newline%&3Welcome &a%display name of player%&3. %new line%&6It is recomended to use Minecraft Version &a1.8.8&6.
+	Server.Max.Slots: 20 #Set server's max slots to the double of {@Server.Max.Slots} in server.properties
+	Server.Full.Message: &cThe server is full! &6Donate at: &b&lbuy.arneo-style.com&r &6to enter the server when full.
+	Server.Ban.Message: &6You can buy unban at: &b&lbuy.arneo-style.com
+	Server.Unintentional.Message: %newline%&7If this ban was given without justice%newline%because of an unintentional act/lag/bug%newline%contact the owner at: &ookans@live.se&r
+	Anti.Afk.Style: Kill #Select "Kill" or "Kick"
+	Anti.Combat.Log: true #Select "true" or "False"
+	
+# subfold #![<Permissions & Features>]
+
+command /help [<text>] [<integer>]:
+	trigger:
+		send " "
+		if arg 2 is not set:
+			set {_number} to 1
+		if arg 2 is set:
+			set {_number} to arg 1
+		if arg 1 is not set:
+			send "&cPlease select the help list for a specific section of command or non-commands with: &b/help <section>"	
+			send " "
+			send "&6&nAvalible sections:"
+			send " "
+			loop {skDemand.Help.Permissions::Sections::*}:
+				set {_permission} to loop-index
+				replace all " """ in {_permission} with ""
+				replace all """ " in {_permission} with ""
+				replace all " """ in {_permission} with ""
+				replace all """ " in {_permission} with ""
+				if player have permission "%{_permission}%":
+					set {_name} to loop-value
+					replace all "CommandsServerManagement" with "Server Management" in {_name}
+					replace all "CommandsEconomy" with "Economy" in {_name}
+					replace all "CommandsBuildingRelatedStuff" with "Building" in {_name}
+					replace all "CommandsCommunication" with "Communication" in {_name}
+					replace all "CommandsTeleportation" with "Teleportation" in {_name}
+					replace all "CommandsFunCommands" with "Fun" in {_name}
+					replace all "CommandsMisc" with "Misc" in {_name}
+					replace all "Features" with "Non-Commands" in {_name}
+					send "&a%{_name}%"
+			wait 1 tick
+			stop
+		if arg 2 is not set:
+			set {_counter} to 0
+		else:
+			set {_counter} to (-5 * (arg 2 - 1))
+		if arg 1 is "Server Management" or "Economy" or "Building" or "Communication" or "Teleportation" or "Fun" or "Misc" or "Non-Commands":
+			send "&7[&b&nHelp %arg 1%&7 %{_number}%]"
+			send " "
+			set {_variablename} to arg 1
+			replace all "Server Management" with "CommandsServerManagement" in {_variablename}
+			replace all "Economy" with "CommandsEconomy" in {_variablename}
+			replace all "Building" with "CommandsBuildingRelatedStuff" in {_variablename}
+			replace all "Communication" with "CommandsCommunication" in {_variablename}
+			replace all "Teleportation" with "CommandsTeleportation" in {_variablename}
+			replace all "Fun" with "CommandsFunCommands" in {_variablename}
+			replace all "Misc" with "CommandsMisc" in {_variablename}
+			replace all "Non-Commands" with "Features" in {_variablename}
+			loop {skDemand.Help.Permissions::%{_variablename}%::*}:
+				set {_permission} to loop-index
+				replace all " """ in {_permission} with ""
+				replace all """ " in {_permission} with ""
+				replace all " """ in {_permission} with ""
+				replace all """ " in {_permission} with ""
+				if player have permission "%{_permission}%":
+					set {_Part.1} to the first index of ":" in {skDemand.Help.Permissions::%{_variablename}%::%loop-index%} characters of {skDemand.Help.Permissions::%{_variablename}%::%loop-index%}
+					set {_Part.2} to the last ( length of {skDemand.Help.Permissions::%{_variablename}%::%loop-index%} - index of ":" in {skDemand.Help.Permissions::%{_variablename}%::%loop-index%}) characters of {skDemand.Help.Permissions::%{_variablename}%::%loop-index%}
+					add 1 to {_counter}
+					if {_counter} is bigger than 0:
+						if {_counter} is smaller than 6:
+							if {_variablename} is "Features":
+								send "&a∙ &6%{_Part.2}%&6"
+							else:
+								send "&a%{_Part.1}%&6%{_Part.2}%&6"
+					if {_counter} is 6:
+						if arg 2 is set:
+							set {_number} to (arg 2 + 1)
+						if arg 2 is not set:
+							set {_number} to 2
+						send " "
+						send "&6&nDo /help %arg 1% %{_number}% for the next page:"
+						send " "
+			wait 1 tick
+			stop
+		
+variables:
+# #!Permissions Commands
+	# #?Sections
+	{skDemand.Help.Permissions::Sections::" skDemand.CommandsServerManagement "} = "CommandsServerManagement"
+	{skDemand.Help.Permissions::Sections::" skDemand.CommandsEconomy "} = "CommandsEconomy"
+	{skDemand.Help.Permissions::Sections::" skDemand.CommandsCommunication "} = "CommandsCommunication"
+	{skDemand.Help.Permissions::Sections::" skDemand.CommandsBuildingRelatedStuff "} = "CommandsBuildingRelatedStuff"
+	{skDemand.Help.Permissions::Sections::" skDemand.CommandsTeleportation "} = "CommandsTeleportation"
+	{skDemand.Help.Permissions::Sections::" skDemand.CommandsFunCommands "} = "CommandsFunCommands"
+	{skDemand.Help.Permissions::Sections::" skDemand.CommandsMisc "} = "CommandsMisc"
+	{skDemand.Help.Permissions::Sections::" skDemand.Features "} = "Features"
+
+	# #?Server Management
+	{skDemand.Help.Permissions::CommandsServerManagement::" skDemand.votekick "} = "/votekick <player> <reason>: Vote kick a player."
+	{skDemand.Help.Permissions::CommandsServerManagement::" skDemand.rules.default "} = "/rules: Shows you the default rules."
+	{skDemand.Help.Permissions::CommandsServerManagement::" skDemand.clearlag "} = "/clearlag: Clears entities."
+	{skDemand.Help.Permissions::CommandsServerManagement::" skDemand.sudo "} = "/sudo <player> <command>: Make a other player execute a command."
+	{skDemand.Help.Permissions::CommandsServerManagement::" skDemand.invsee "} = "/invsee <player>: Look at a player's inventory."
+	{skDemand.Help.Permissions::CommandsServerManagement::" skDemand.othersender "} = "/enderchest <player>: Look at a player's enderchest."
+	{skDemand.Help.Permissions::CommandsServerManagement::" skDemand.broadcast "} = "/broadcast <text>: Send a message to the server anonymously."
+	{skDemand.Help.Permissions::CommandsServerManagement::" skDemand.ping "} = "/ping: Sends you a message. (For checking lag)."
+	{skDemand.Help.Permissions::CommandsServerManagement::" skDemand.vanish "} = "/vanish: Vanish/Be invisible"
+	{skDemand.Help.Permissions::CommandsServerManagement::" skDemand.ban "} = "/ban <player> <reason>: Ban a player from the server + supports reasons."
+	{skDemand.Help.Permissions::CommandsServerManagement::" skDemand.tempban "} = "/tempban <player> <reason> <timespan>: Temporary ban a player for a specific timespan."
+	{skDemand.Help.Permissions::CommandsServerManagement::" skDemand.unban "} = "/unban <player>: Unban a banned player."
+	{skDemand.Help.Permissions::CommandsServerManagement::" skDemand.socialspy "} = "/socialspy: See others private messages"
+	{skDemand.Help.Permissions::CommandsServerManagement::" skDemand.mute "} = "/mute <player> <reason>: Mute a player so they wont be able to write in chat or private message."
+	{skDemand.Help.Permissions::CommandsServerManagement::" skDemand.tempmute "} = "/tempmute <reason> <timespan>: Temporary mute a player + supports reasons."
+	{skDemand.Help.Permissions::CommandsServerManagement::" skDemand.unmute "} = "/unmute <player>: Unmute a player."
+	# #?Economy
+	{skDemand.Help.Permissions::CommandsEconomy::" skDemand.ecotake "} = "/eco take <player> <amount>: Take away money from a player."
+	{skDemand.Help.Permissions::CommandsEconomy::" skDemand.ecogive "} = "/eco give <player> <amount>: Give money to a player."
+	{skDemand.Help.Permissions::CommandsEconomy::" skDemand.pay "} = "/pay <player> <amount>: Pay a player with money."
+	{skDemand.Help.Permissions::CommandsEconomy::" skDemand.bal "} = "/bal: Check your balance."
+	{skDemand.Help.Permissions::CommandsEconomy::" skDemand.othersbal "} = "/bal <player>: Check another players balance."
+	{skDemand.Help.Permissions::CommandsEconomy::" skDemand.baltop "} = "/baltop: See the top list of all players balance."
+	# #?Building & Related stuff
+	{skDemand.Help.Permissions::CommandsBuildingRelatedStuff::" skDemand.spawnmob "} = "/spawnmob <mob> [<amount>]: Spawn a mob at targeted block."
+	{skDemand.Help.Permissions::CommandsBuildingRelatedStuff::" skDemand.itemdb "} = "/itemdb: See a item's id."
+	{skDemand.Help.Permissions::CommandsBuildingRelatedStuff::" skDemand.give "} = "/i <item> [<amount>]: Gives you or a player an item or block with a set amount."
+	{skDemand.Help.Permissions::CommandsBuildingRelatedStuff::" skDemand.time "} = "/time: Shows time."
+	{skDemand.Help.Permissions::CommandsBuildingRelatedStuff::" skDemand.settime "} = "/time <time>: Sets time."
+	{skDemand.Help.Permissions::CommandsBuildingRelatedStuff::" skDemand.gm "} = "/gm <gamemode>: Changes your gamemode."
+	{skDemand.Help.Permissions::CommandsBuildingRelatedStuff::" skDemand.gmother "} = "/gm <gamemode> <player>: Change other player's gamemode."
+	{skDemand.Help.Permissions::CommandsBuildingRelatedStuff::" skDemand.position "} = "/position: Shows your coordinates."
+	{skDemand.Help.Permissions::CommandsBuildingRelatedStuff::" skDemand.weather "} = "/weather: Shows what weather it is & set weather."
+	{skDemand.Help.Permissions::CommandsBuildingRelatedStuff::" skDemand.fly "} = "/fly: Be able to fly in any gamemode."
+	{skDemand.Help.Permissions::CommandsBuildingRelatedStuff::" skDemand.flyother "} = "/fly <player>: Be able to fly in any gamemode."
+	{skDemand.Help.Permissions::CommandsBuildingRelatedStuff::" skDemand.speed "} = "/speed: Set walk speed or fly speed."
+	{skDemand.Help.Permissions::CommandsBuildingRelatedStuff::" skDemand.signedit "} = "/se: Edit text on a sign."
+	{skDemand.Help.Permissions::CommandsBuildingRelatedStuff::" skDemand.skull.get "} = "/head <player>: Give you a player's head."
+	# #?Communication
+	{skDemand.Help.Permissions::CommandsCommunication::" skDemand.me "} = "/me: Describe action"
+	{skDemand.Help.Permissions::CommandsCommunication::" skDemand.chatclear "} = "/cc: Clears the chat"
+	{skDemand.Help.Permissions::CommandsCommunication::" skDemand.unignore "} = "/unignore: Unignore a player."
+	{skDemand.Help.Permissions::CommandsCommunication::" skDemand.ignore "} = "/ignore: Ignore a player."
+	{skDemand.Help.Permissions::CommandsCommunication::" skDemand.ignorelist "} = "/ignorelist: See the ignore list."
+	{skDemand.Help.Permissions::CommandsCommunication::" skDemand.nickother "} = "/nickother: Nick other Player"
+	{skDemand.Help.Permissions::CommandsCommunication::" skDemand.nick "} = "/nick: Nick Yourself"
+	{skDemand.Help.Permissions::CommandsCommunication::" skDemand.mail "} = "/mail: Check & Send mail."
+	{skDemand.Help.Permissions::CommandsCommunication::" skDemand.pm "} = "/pm: Private message."
+	# #?Teleportation
+	{skDemand.Help.Permissions::CommandsTeleportation::" skDemand.back "} = "/back: Teleport you to your last location."
+	{skDemand.Help.Permissions::CommandsTeleportation::" skDemand.tp "} = "/tp: Teleports player to someone."
+	{skDemand.Help.Permissions::CommandsTeleportation::" skDemand.tphere "} = "/tphere: Teleports another player to player."
+	{skDemand.Help.Permissions::CommandsTeleportation::" skDemand.tpall "} = "/tpall: Teleports all to player."
+	{skDemand.Help.Permissions::CommandsTeleportation::" skDemand.tpa "} = "/tpa: Teleport request to another player."
+	{skDemand.Help.Permissions::CommandsTeleportation::" skDemand.tpahere "} = "/tpahere: Teleport request to another player to teleport to player.	"
+	{skDemand.Help.Permissions::CommandsTeleportation::" skDemand.tpaall "} = "/tpaall: Teleport request to  all players to teleport to player."
+	{skDemand.Help.Permissions::CommandsTeleportation::" skDemand.sethome "} = "/sethome: Sets home to player's location."
+	{skDemand.Help.Permissions::CommandsTeleportation::" skDemand.home "} = "/home: Teleports player to player's home"
+	{skDemand.Help.Permissions::CommandsTeleportation::" skDemand.setspawn "} = "/setspawn: Sets spawn to player's location."
+	{skDemand.Help.Permissions::CommandsTeleportation::" skDemand.spawn "} = "/spawn: Teleports player to spawn."
+	{skDemand.Help.Permissions::CommandsTeleportation::" skDemand.setfirstspawn "} = "/setfirstspawn: Sets first spawn."
+	{skDemand.Help.Permissions::CommandsTeleportation::" skDemand.setwarp "} = "/setwarp: Sets a warp to players position."
+	{skDemand.Help.Permissions::CommandsTeleportation::" skDemand.delwarp "} = "/delwarp: Deletes a warp."
+	{skDemand.Help.Permissions::CommandsTeleportation::" skDemand.warplist "} = "/warp: Shows a list of all warps & allows you to warp."
+	# #?Fun commands
+	{skDemand.Help.Permissions::CommandsFunCommands::" skDemand.rocket "} = "/rocket: Pushes a player up very high."
+	{skDemand.Help.Permissions::CommandsFunCommands::" skDemand.slap "} = "/slap: Slap a player."
+	{skDemand.Help.Permissions::CommandsFunCommands::" skDemand.smite "} = "/smite: Lightning at a player."
+	{skDemand.Help.Permissions::CommandsFunCommands::" skDemand.ride "} = "/ride: Ride a player."
+	{skDemand.Help.Permissions::CommandsFunCommands::" skDemand.rideon "} = "/rideon: Make a mob ride you."
+	{skDemand.Help.Permissions::CommandsFunCommands::" skDemand.hat "} = "/hat: Have a hat."
+	# #?Misc
+	{skDemand.Help.Permissions::CommandsMisc::" skDemand.enderchest "} = "/enderchest: Open player's enderchest."
+	{skDemand.Help.Permissions::CommandsMisc::" skDemand.heal "} = "/heal: Heals player."
+	{skDemand.Help.Permissions::CommandsMisc::" skDemand.repair "} = "/repair: Repair 1 item or all items or specific set of items."
+	{skDemand.Help.Permissions::CommandsMisc::" skDemand.kill "} = "/kill: Kills player or another player."
+	{skDemand.Help.Permissions::CommandsMisc::" skDemand.killall "} = "/killall: Kills all players."
+	{skDemand.Help.Permissions::CommandsMisc::" skDemand.seen "} = "/seen See when a player was last online."
+	{skDemand.Help.Permissions::CommandsMisc::" skDemand.suicide "} = "/suicide: Kills you."
+	{skDemand.Help.Permissions::CommandsMisc::" skDemand.ci "} = "/ci: Clears player inventory."
+	{skDemand.Help.Permissions::CommandsMisc::" skDemand.ciother "} = "/ci <player>: Clears another player's inventory."
+	{skDemand.Help.Permissions::CommandsMisc::" skDemand.afk "} = "/afk: Puts player in afk mode.	"
+	{skDemand.Help.Permissions::CommandsMisc::" skDemand.nametool "} = "/nametool: Rename a item or block held."
+	{skDemand.Help.Permissions::CommandsMisc::" skDemand.list "} = "/list: Shows a list of all online players."
+	{skDemand.Help.Permissions::CommandsMisc::" skDemand.exptake "} = "/exp: Take away xp from a player."
+	{skDemand.Help.Permissions::CommandsMisc::" skDemand.expgive "} = "/exp: Give xp to a player."
+
+
+# #!Permissions Features
+	{skDemand.Help.Permissions::Features::" skDemand.healtimer.bypass "} = "You don't need to wait 5 min to heal again after doing the command /heal."
+	{skDemand.Help.Permissions::Features::" skDemand.silentjoin "} = "No join message when you join."
+	{skDemand.Help.Permissions::Features::" skDemand.silentleave "} = "No leave message when you leave."
+	{skDemand.Help.Permissions::Features::" skDemand.vanishsee "} = "You can see vanished players."
+	{skDemand.Help.Permissions::Features::" skDemand.staffsee "} = "You get a notification on chat when someone gets muted or banned."
+	{skDemand.Help.Permissions::Features::" skDemand.buy.sign.create "} = "You can create a buy sign."
+	{skDemand.Help.Permissions::Features::" skDemand.sell.sign.create "} = "You can create a sell sign."
+	{skDemand.Help.Permissions::Features::" skDemand.enchant.sign.create "} = "You can create a enchant sign."
+	{skDemand.Help.Permissions::Features::" skDemand.repair.sign.create "} = "You can create a repair sign."
+	{skDemand.Help.Permissions::Features::" skDemand.sign.colour "} = "You can create coloured signs."
+	{skDemand.Help.Permissions::Features::" skDemand.sign.format "} = "You can create formatted signs."
+	{skDemand.Help.Permissions::Features::" skDemand.chat.colour "} = "You can use colour codes in skDemand.chat"
+	{skDemand.Help.Permissions::Features::" skDemand.chat.format "} = "You can use format codes in skDemand.chat"
+	{skDemand.Help.Permissions::Features::" skDemand.chat.symbol "} = "You can use symbols in skDemand.chat"
+	{skDemand.Help.Permissions::Features::" skDemand.chat.censor-bypass "} = "Your message won't be censored if you are swearing."
+	{skDemand.Help.Permissions::Features::" skDemand.web-address-bypass "} = "You can post web addresses."
+	{skDemand.Help.Permissions::Features::" skDemand.ip-address-bypass"} = "You can post ip addresses."
+	{skDemand.Help.Permissions::Features::" skDemand.chat.ignore-bypass "} = "You can't be ignored with /ignore."
+	{skDemand.Help.Permissions::Features::" skDemand.group.donor1 "} = "You are in: {@Donor1.Prefix} group."
+	{skDemand.Help.Permissions::Features::" skDemand.group.donor2 "} = "You are in: {@Donor2.Prefix} group."
+	{skDemand.Help.Permissions::Features::" skDemand.group.donor3 "} = "You are in: {@Donor3.Prefix} group."
+	{skDemand.Help.Permissions::Features::" skDemand.group.donor4 "} = "You are in: {@Donor4.Prefix} group."
+	{skDemand.Help.Permissions::Features::" skDemand.group.donor5 "} = "You are in: {@Donor5.Prefix} group."
+	{skDemand.Help.Permissions::Features::" skDemand.group.owner "} = "You are in: Owner group."
+	{skDemand.Help.Permissions::Features::" skDemand.group.admin "} = "You are in: Admin group."
+	{skDemand.Help.Permissions::Features::" skDemand.group.builder "} = "You are in: Builder group."
+	{skDemand.Help.Permissions::Features::" skDemand.group.mod "} = "You are in: Mod group."
+	{skDemand.Help.Permissions::Features::" skDemand.tab.red "} = "Your name in tab list will be red."
+	{skDemand.Help.Permissions::Features::" skDemand.tab.blue "} = "Your name in tab list will be blue"
+	{skDemand.Help.Permissions::Features::" skDemand.tab.purple "} = "Your name in tab list will be purple."
+	{skDemand.Help.Permissions::Features::" skDemand.tab.yellow "} = "Your name in tab list will be yellow."
+	{skDemand.Help.Permissions::Features::" skDemand.tab.gray "} = "Your name in tab list will be gray."
+	{skDemand.Help.Permissions::Features::" skDemand.tab.owner "} = "Your name in tab list will be &k (magic)."
+	{skDemand.Help.Permissions::Features::" skDemand.spawnbypass "} = "You don't have to wait 10 seconds for teleport to spawn."
+
+# subfold #![<Miscellaneous events>]
+
+#Disposal sign
+On Sign Change:
+	if line 1 is "[Trash]" or "[Disposal]":
+		set line 1 to "&1%line 1%"
+		
+on click on sign:
+	if line 1 is "&1[Disposal]" or "&1[Trash]":
+		cancel event
+		show " " with 3 rows named "Disposal" to player
+
+#Join When Server Full
+on ping:
+	set player count to {@Server.Max.Slots}
+	
+on join:
+	wait 1 second
+	set {_onlineplayers} to number of all players
+	if {_onlineplayers} is more or equal to {@Server.Max.Slots}:
+		if player have permission "skDemand.fulljoin":
+			stop
+		wait 1 tick
+		kick the player due to "{@Server.Full.Message}"
+
+#No plugin look
+on command "/pl" or "/plugin" or "/?" or "/version" or "/plugins":
+	if player have permission "skDemand.server.info":
+		stop
+	cancel event
+	
+#Login msg
+on login:
+	set join message to ""
+	if player hasn't played before:
+		stop
+	if player have permission "skDemand.silentjoin":
+		stop
+	clear {skDemand.Quit::%player%}
+	wait 1.75 seconds
+	if player is online:
+		if player have permission "skDemand.group.donor1" or "skDemand.group.admin":
+			launch flickering burst firework colored red at player timed 0.75
+		loop all players:
+			play raw sound "NOTE_SNARE_DRUM" only to loop-player with pitch 10 volume 0.5
+			if {skDemand.Nick.On::%player%} is set:
+				send "&a+ &7%player's display name%&8/&7&8(&7%player's name%&8)&r" to loop-player
+			else:
+				send "&a+ &7%player%" to loop-player
+
+on disconnect:
+	set leave message to ""
+	if player have permission "skDemand.silentleave":
+		stop
+	if {skDemand.Online::%player%} is not set:
+		stop
+	if difference between {skDemand.Online::%player%} and now is more than 2 seconds:
+		loop all players:
+			play raw sound "NOTE_BASS" only to loop-player with pitch 10 volume 0.5
+		if {skDemand.Nick.On::%player%} is set:
+			broadcast "&c- &7%player's display name%&8/&7&8(&7%player's name%&8)&r"
+		else:
+			broadcast "&c- &7%player%"
+
+	
+#Clear variables
+#Online & Offline check stuff
+on disconnect:
+	clear {skDemand.Online::%player%}
+	wait 2 ticks
+	set {skDemand.Quit::%player%} to now
+	if player's gamemode is survival or adventure:
+		set fly mode of player to false
+	clear {skDemand.Fly::%player%}
+	clear {skDemand.Vanish::%player%}
+	clear {skDemand.Last.Message::%player%}
+	
+on join:
+	set {skDemand.Online::%player%} to now
+	wait 5 ticks
+	reveal player to all players
+	loop all players:
+		if {skDemand.Vanish::%loop-player%} is loop-player:
+			if player doesn't have permission "skDemand.vanishsee":
+				hide loop-player from player
+	if player hasn't played before:
+		set {skDemand.Player::%player%} to "%player%"
+		set {skDemand.First.Time.Joined::%player%} to now
+	set {skDemand.IP.Address::%player%} to "%IP of player%"
+	add 1 to {skDemand.Logins::%player%}
+	if  {skDemand.Prefix::%player%} is set:
+		if player doesn't have permission "skDemand.group.donor1" or "skDemand.group.donor2" or "skDemand.group.donor3" or "skDemand.group.donor4" or "skDemand.group.donor5" or "skDemand.group.builder" or "skDemand.group.mod" or "skDemand.group.admin" or "skDemand.group.owner":
+			clear {skDemand.Prefix::%player%}
+		stop
+	if {skDemand.Prefix::%player%} isn't set:
+		if player have permission "skDemand.group.donor1":
+			if {Premium::%player%} is set:
+				set {skDemand.Prefix::%player%} to "&6[&3Altaïr&6]"
+			if {Ultimate::%player%} is set:
+				set {skDemand.Prefix::%player%} to "&6[&3Altaïr&6]"
+		if player have permission "skDemand.group.donor2":
+			set {skDemand.Prefix::%player%} to "{@Donor2.Prefix}"
+		if player have permission "skDemand.group.donor3":
+			set {skDemand.Prefix::%player%} to "{@Donor3.Prefix}"
+		if player have permission "skDemand.group.donor4":
+			set {skDemand.Prefix::%player%} to "{@Donor4.Prefix}"
+		if player have permission "skDemand.group.donor5":
+			set {skDemand.Prefix::%player%} to "{@Donor5.Prefix}"
+		if player have permission "skDemand.group.builder":
+			set {skDemand.Prefix::%player%} to "{@Builder.Prefix}"
+		if player have permission "skDemand.group.mod":
+			set {skDemand.Prefix::%player%} to "{@Mod.Prefix}"
+		if player have permission "skDemand.group.admin":
+			set {skDemand.Prefix::%player%} to "{@Admin.Prefix}"
+		if player have permission "skDemand.group.owner":
+			set {skDemand.Prefix::%player%} to "{@Owner.Prefix}"
+
+on command "/stop":
+	loop all players:
+		set {skDemand.Quit::%loop-player%} to now
+		clear {skDemand.tp%loop-player%::*}
+	clear {skDemand.Vote.For}
+	clear {skDemand.Vote.Against}
+	clear {skDemand.Voted::*}
+	clear {skDemand.Vanish::*}
+	clear {skDemand.Fly::*}
+	clear {skDemand.Online::*}
+	clear {skDemand.AFK::*}
+	clear {skDemand.Heal::*}
+	clear {skDemand.Riding::*}
+	clear {skDemand.LastPM::*}
+	clear {skDemand.Spam::*}
+	clear {skDemand.Spawn.Wait::*}
+	clear {skDemand.Seconds.Until.Out::*}
+	clear {skDemand.In.Combat::*}
+	clear {skDemand.Back::*}
+	clear {skDemand.Last.Message::*}
+	clear {skDemand.Help.Permissions::Commands::*}
+	clear {skDemand.Help.Permissions::Features::*}
+	clear {skDemand.Help.Permissions::CommandsBuildingRelatedStuff::*}
+	clear {skDemand.Help.Permissions::CommandsCommunication::*}
+	clear {skDemand.Help.Permissions::CommandsEconomy::*}
+	clear {skDemand.Help.Permissions::CommandsFunCommands::*}
+	clear {skDemand.Help.Permissions::CommandsMisc::*}
+	clear {skDemand.Help.Permissions::CommandsServerManagement::*}
+	clear {skDemand.Help.Permissions::CommandsTeleportation::*}
+	clear {skDemand.chat.Ask::*}
+	clear {skDemand.chat.Colour::*}
+	clear {skDemand.chat.Format::*}
+	clear {skDemand.chat.Symbol::*}
+	clear {skDemand.chat.Censor::*}
+	clear {skDemand.Permission.Group::*}
+	clear {skDemand.Domains::*}
+	stop
+	
+#Welcome message
+on join:
+	player hasn't played before
+	teleport player to {skDemand.First.Spawn}
+	wait 3 ticks
+	broadcast "&3Welcome &a%player% &3to {@Server.Name}&r&3!"
+	teleport player to {skDemand.First.Spawn}
+	wait 3.3 seconds
+	loop all players:
+		if loop-player have permission "skDemand.group.owner" or "skDemand.group.admin":
+			if {skDemand.Vanish::%loop-player%} is not set:
+				if loop-player isn't player:
+					make loop-player say "Welcome %player% :)"
+	
+#Block 36
+on right click on block 36:
+	cancel event
+	wait 1 tick
+	set block to block 36
+	
+#MOTD
+on player join:
+	extinguish the player
+	heal player
+	add 10 to player's hunger bar
+	remove speed, slowness, haste, mining fatigue, strength, instant health, instant damage, jump boost, nausea, regeneration, resistance, fire resistance, water breathing, invisibility, blindness, night vision, weakness, poison and wither from the player
+	player has played on this server before
+	wait 1.8 seconds
+	loop 150 times:
+		send " "
+	wait 0.05 seconds
+	send "{@Server.MOTD}" to player
+	
+#Wool colour chat
+on chat:
+	if player is holding a brown wool:
+		set message to "<orange>%message%"
+		stop
+	if player is holding a wool:
+		set message to "<%colour of tool%>%message%"
+	
+#AntiCombatLog
+on quit:
+	if player is alive:
+		if {in.combat.%player%} is true:
+			if {skDemand.Banned::%player%} is set:
+				stop
+			if {skDemand.TempBan::%player%} is set:
+				stop
+			execute console command "ctempban %player% Combat logging 37.5 minutes"
+			kill player
+		send "&7[AntiCombatLog] &aYou can safely log out now" to {combat.%player%}
+	delete {in.combat.%player%}
+	delete {seconds.until.out.%player%}
+	delete {in.combat.%{combat.%player%}%}
+	delete {seconds.until.out.%{combat.%player%}%}
+	delete {combat.%player%}
+	delete {combat.%{combat.%player%}%}
+
+on damage of player:
+	set {_region} to "%region at attacker%"
+	if {_region} is "spawn in world Assassin's Creed":
+		cancel event
+		stop
+	if attacker is a player:
+		if {in.combat.%victim%} is true:
+			set {seconds.until.out.%victim%} to 7.5
+			stop
+		send "&7[AntiCombatLog] &cYou are in combat now, don't log out!" to victim
+		set {in.combat.%victim%} to true
+		set {combat.%attacker%} to victim
+		set {seconds.until.out.%victim%} to 7.5
+		while {seconds.until.out.%victim%} is more than 1:
+			{seconds.until.out.%victim%} is not set:
+				stop
+			subtract 1 from {seconds.until.out.%victim%}
+			wait 1 second
+		if {in.combat.%victim%} is set:
+			delete {in.combat.%victim%}
+			delete {seconds.until.out.%victim%}
+			send "&7[AntiCombatLog] &aYou can safely log out now" to victim
+			
+#		if {in.combat.%attacker%} is true:
+#			set {seconds.until.out.%attacker%} to 10
+#			stop
+#		send "&7[AntiCombatLog] &cYou are in combat now, don't log out!" to attacker
+#		set {in.combat.%attacker%} to true
+#		set {combat.%victim%} to attacker
+#		set {seconds.until.out.%attacker%} to 10
+#		while {seconds.until.out.%attacker%} is more than 1:
+#			{seconds.until.out.%attacker%} is not set:
+#				stop
+#			subtract 1 from {seconds.until.out.%attacker%}
+#			wait 1 second
+#		if {in.combat.%attacker%} is set:
+#			delete {in.combat.%attacker%}
+#			delete {seconds.until.out.%attacker%}
+#			send "&7[AntiCombatLog] &aYou can safely log out now" to attacker
+	
+on death of player:
+#	set {_style} to "{@Anti.Combat.Log}" parsed as text
+#	if {_style} is "Kill":
+	send "&7[AntiCombatLog] &aYou can safely log out now" to {combat.%player%}
+	send "&7[AntiCombatLog] &aYou can safely log out now" to victim
+	delete {in.combat.%player%}
+	delete {seconds.until.out.%player%}
+	delete {in.combat.%{combat.%player%}%}
+	delete {seconds.until.out.%{combat.%player%}%}
+	
+on damage of player:
+	set {_region} to "%region at attacker%"
+	if {_region} is "spawn in world Assassin's Creed":
+		cancel event
+		stop
+#	if attacker is a player:
+#		if {in.combat.%attacker%} is true:
+#			set {seconds.until.out.%attacker%} to 10
+#			stop
+#		send "&7[AntiCombatLog] &cYou are in combat now, don't log out!" to attacker
+#		set {in.combat.%attacker%} to true
+#		set {combat.%victim%} to attacker
+#		set {seconds.until.out.%attacker%} to 10
+#		while {seconds.until.out.%attacker%} is more than 1:
+#			{seconds.until.out.%attacker%} is not set:
+#				stop
+#			subtract 1 from {seconds.until.out.%attacker%}
+#			wait 1 second
+#		if {in.combat.%attacker%} is set:
+#			delete {in.combat.%attacker%}
+#			delete {seconds.until.out.%attacker%}
+#			send "&7[AntiCombatLog] &aYou can safely log out now" to attacker
+	
+on join:
+	{in.combat.%player%} is set:
+		delete {in.combat.%player%}
+	{seconds.until.out.%player%} is set:
+		delete {seconds.until.out.%player%}
+	{combat.%player%} is set:
+		delete {combat.%player%}
+		
+on command "/stop":
+	loop all players:
+		{in.combat.%loop-player%} is set:
+			delete {in.combat.%loop-player%}
+		{seconds.until.out.%loop-player%} is set:
+			delete {seconds.until.out.%loop-player%}
+		{combat.%loop-player%} is set:
+			delete {combat.%loop-player%}
+		
+every 5 tick:
+	loop all players:
+		if {in.combat.%loop-player%} is set:
+			if loop-player doesn't have permission "skDemand.group.donor1" or "skDemand.group.admin" or "skDemand.group.owner":
+				close inventory of loop-player
+	
+#No rain
+On Weather Change:
+	set weather to clear
+
+#Log ip
+on first join:
+	log "%player%'s first ip is %IP of player%" to "iplog/ip"
+
+#Health Bar (Player)
+on load:
+	execute console command "scoreboard objectives add heart health ❤"
+	execute console command "scoreboard objectives setDisplay belowName heart"
+		
+# subfold #![<Server Management>]
+
+# #? Miscellaneous
+
+#Rules
+command /rules:
+	permission: skDemand.rules.default
+	trigger:
+		send " "
+		send "&4&n&lRULES:"
+		send " "
+		send "▼ POSITIVITY."
+		send "▼ Trolling is Ok if it's with good intention."
+		send "▼ Use common sense (Includes: Don't Lie)."
+		send "▼ Respect Everyone."
+		send "▼ Public Chat is English Only."
+		send "▼ No Advertising."
+		send "▼ No Swearing."
+		send "▼ No Giveaways aka drop party."
+		send "▼ No Sexual Stuff."
+		send "▼ No hacked clients or unapproved mods."
+		send "▼ Don't ask for OP, Ranks, Items, Money, Gamemode, Unmute & Unban."
+		send " "
+
+#Vote kick
+command /votekick <player> <text>:
+	permission: skDemand.votekick
+	trigger:
+		if {skDemand.Vote.Kick::*} is set:
+			send "&cThere is already a votekick going on!"
+			stop
+		if arg 2 is not set:
+			send "&6Write the reason for the kick.  (&a/votekick <player> <reason>&6)."
+			stop
+		broadcast "&a%player% &6has called a vote to kick &a%arg 1% &6because of he or she is: &a%arg 2%&6!"
+		broadcast "&6Use &a/for &6to vote to kick them!"
+		broadcast "&6Use &a/against &6to keep them!"
+		add 2 to {skDemand.Vote.For}
+		wait 1 tick
+		send "&6You voted to kick the player!"
+		set {skDemand.Voted::%player%} to true
+		set {skDemand.Vote.Kick::%arg 1%} to arg 1 
+		wait 1 tick
+		add 1 to {skDemand.Vote.Against}
+		send "&6You voted to keep the player!" to arg 1
+		set {skDemand.Voted::%arg 1%} to true
+		wait 1 minute
+		if {skDemand.Vote.For} is greater than {skDemand.Vote.Against}:
+			execute console command "ctempban %arg 1% %arg 2% 1 hour"
+			broadcast "&a%arg 1% &cwas voted to be kicked!"
+			log  "%player% votekicked <%arg 1%> for <%arg 2%> at <%now%> in world <%world%>" to "Votekick.log"
+			set {_ID} to (size of {skDemand.report.player::*})+1
+			set {skDemand.Caller.Player::%{_ID}%} to player
+			set {skDemand.Votekicked.Player::%{_ID}%} to arg 1
+			set {skDemand.Votekick.Reason::%{_ID}%} to arg 2
+			loop all players:
+				loop-player has permission "skDemand.staffsee"
+				send "&a%sender% votekicked a player" to loop-player
+				send "&aUse '/kickread %{_ID}%' to read it" to loop-player
+			clear {skDemand.Vote.For}
+			clear {skDemand.Vote.Against}
+			clear {skDemand.Voted::*}
+			clear {skDemand.Vote.Kick::*}
+		else:
+			broadcast "&cThere were not enough votes to kick &a%arg 1%&c!"
+			clear {skDemand.Vote.For}
+			clear {skDemand.Vote.Against}
+			clear {skDemand.Voted::*}
+			clear {skDemand.Vote.Kick::*}
+
+command /for:
+	trigger:
+		if {skDemand.Voted::%player%} is set:
+			message "&cYou have already voted!"
+			stop
+		else:	
+			add 1 to {skDemand.Vote.For}
+			message "&6You voted to kick the player!"
+			set {skDemand.Voted::%player%} to true
+			stop
+			
+command /against:
+	trigger:
+		if {skDemand.Voted::%player%} is set:
+			message "&cYou have already voted!"
+			stop
+		else:	
+			add 1 to {skDemand.Vote.Against}
+			message "&6You voted to keep the player!"
+			set {skDemand.Voted::%player%} to true
+			stop
+			
+command /kickread <text=help>:
+	permission: skDemand.staffsee
+	trigger:
+		if arg is not set:
+			send "&aYou need to specify a ticket id"
+			stop
+		else:
+			set {_ID} to arg parsed as number
+			if {_ID} is not set:
+				make player execute command "/kickread"
+				stop
+			if {skDemand.Votekick.Reason::%{_ID}%} is not set:
+				send "&c[&bERROR&c]&f: &7That ID does not exists"
+				stop
+			send "&b[ID: %{_ID}%] &7[&c%{skDemand.Caller.Player::%{_ID}%}%&7]: &eVotekicked: &a%{skDemand.Votekicked.Player::%{_ID}%}% &eFor: &a%{skDemand.Votekick.Reason::%{_ID}%}%"
+			
+#Clear lag
+command /clearlagg:
+	permission: skDemand.clearlag
+	aliases: /cl, /clearlag
+	description: Clear some entity's
+	trigger:
+		set {_Deleted} to 0
+		loop all entities in world of sender:
+			if loop-entity is not a player:
+				delete loop-entity
+				add 1 to {_Deleted}
+			else if loop-entity is not a item frame:
+				delete loop-entity
+				add 1 to {_Deleted}
+			else if loop-entity is not a painting:
+				delete loop-entity
+				add 1 to {_Deleted}
+		message "&a%{_Deleted}% &6Entities Cleard in &a%world%&6!"
+		message "&6Exept players, item frame & paintings."
+		stop
+		
+#Sudo
+command /sudo <player> <text>:
+	description: Make another player to execute a command
+	trigger:
+		if player doesn't have permission "skDemand.sudo":
+			stop
+		make arg 1 execute command "%arg 2%"
+		send "&6You made &a%arg 1% &6make command &a%arg 2%&6."
+		
+#Inventory see
+command /invsee <player>:
+	description: Shows the player's inventory
+	aliases: /inventorysee, /inv, /lookinv, /lookinventory
+	permission: skDemand.invsee
+	trigger:
+		open the arg 1's inventory for the player
+		
+#Own enderchest or other
+command /enderchest [<player>]:
+	aliases: /ec
+	trigger:
+		if arg 1 is set:
+			if player has permission "skDemand.othersender":
+				open arg 1's enderchest to player
+			else:
+				send "&cYou don't have permission."
+		else:
+			player has permission "skDemand.enderchest"
+			open player's enderchest to player
+
+#Broadcast
+command /broadcast <text>:
+	aliases: /announce
+	description: Broadcast an message (anonymously)
+	permission: skDemand.broadcast
+	trigger:
+		broadcast "&6[&4Broadcast&6] &6%arg 1%&6."
+		
+#Lag reduce & Test
+command /ping:
+	aliases: /ping!, /pong, /echo
+	permission: skDemand.ping
+	description: Used to detect lag
+	trigger:
+		send "&6Pong"
+		
+# #? Vanish
+#Vanish
+command /vanish:
+	permission: skDemand.vanish
+	trigger:
+		if {skDemand.Vanish::%player%} is not set:
+			set {skDemand.Vanish::%player%} to player
+			set the player's tablist name to ""
+			loop all players:
+				if loop-player doesn't have permission "skDemand.vanishsee":
+					hide player to loop-player
+			send "&7Vanished."
+		else:
+			clear {skDemand.Vanish::%player%}
+			reveal player to all players
+			send "&7You are no longer Vanished."
+			if player has permission "skDemand.tab.red":
+				set the player's tablist name to "&c%name of player%"
+			if player has permission "skDemand.tab.blue":
+				set the player's tablist name to "&b%name of player%"
+			if player has permission "skDemand.tab.purple":
+				set the player's tablist name to "&d%name of player%"			
+			if player has permission "skDemand.tab.yellow":
+				set the player's tablist name to "&e%name of player%"
+			if player has permission "skDemand.tab.gray":
+				set the player's tablist name to "&7%name of player%"
+			if player has permission "skDemand.tab.owner":
+				set the player's tablist name to "&6&k%player%"
+			if player has permission "skDemand.tab.normal":
+				set the player's tablist name to "&o%name of player%"
+			if player has permission "skDemand.tab.gold":
+				set the player's tablist name to "&6%name of player%"
+			if player doesn't have permission "skDemand.tab.gold" or "skDemand.tab.normal" or "skDemand.tab.owner" or "skDemand.tab.purple" or "skDemand.tab.blue" or "skDemand.tab.red" or "skDemand.tab.yellow" or "skDemand.tab.gray":
+				set the player's tablist name to "%name of player%"
+				
+on join:
+	player have permission "skDemand.vanishsee"
+	{skDemand.Vanish::*} is set
+	loop {skDemand.Vanish::*}:
+		set {_player} to loop-value parsed as player
+		reveal {_player} to player
+				
+on command "/stop":
+	loop all players:
+		reveal player to all players
+	clear {skDemand.Vanish::*}
+				
+on disconnect:
+	clear {skDemand.Vanish::%player%}
+	reveal player to all players
+			
+# Logs how long staffs been active
+on disconnect:
+	if player have permission "skDemand.group.admin" or "skDemand.group.mod":
+		set {_onlinetime} to difference between {skDemand.Online::%player%} and now
+		add {_onlinetime} to {skDemand.Staff.Online.Time::%player%}
+		
+# Logs every hour
+every 1 hour:
+	add 1 to {skDemand.Server.Hours}
+	if {skDemand.Server.Hours} is greater than or equal to 168:
+		clear {skDemand.Server.Hours}
+		loop {skDemand.Staff.Online.Time::*}:
+			log " " to "staffonline.log"
+			log " " to "staffonline.log"
+			log " " to "staffonline.log"
+			log "%loop-index% has been online %loop-value% this week %now%" to "staffonline.log"
+			log " " to "staffonline.log"
+		clear {skDemand.Staff.Online.Time::*}
+		loop {skDemand.Staff.Log::*}:
+			log " " to "staffonline.log"
+			log "%loop-index% has banned %loop-value% player(s) this week %now%" to "bans.log"
+			log " " to "staffonline.log"
+		clear {skDemand.Staff.Log::*}
+		loop {skDemand.Mutes::*}:
+			log " " to "staffonline.log"
+			log "%loop-index% has muted %loop-value% player(s) this week %now%" to "mutes.log"
+			log " " to "staffonline.log"
+			log " " to "staffonline.log"
+			log " " to "staffonline.log"
+		clear {skDemand.Mutes::*}
+
+# #? Ban & Mutes
+#Ban
+command /ban <offline player> <text>:
+	permission: skDemand.ban
+	trigger:
+		set {skDemand.Banned::%arg 1%} to arg 1
+		set {skDemand.Banned.Reason::%arg 1%} to arg 2
+		set {skDemand.Banner::%arg 1%} to player
+		add 1 to {skDemand.Staff.Log::%player%}
+		kick the arg 1 due to "&cBanned for: &a%arg 2%&c."
+		loop all players:
+			if loop-player has permission "skDemand.staffsee":
+				send "&a%arg 1% &6has been banned! For: &a%arg 2% &6By: &a%player%&6." to loop-player
+				
+#Ban console version
+command /cban <offline player> <text>:
+	executable by: console
+	trigger:		
+		set {skDemand.Banned::%arg 1%} to arg 1
+		set {skDemand.Banned.Reason::%arg 1%} to arg 2
+		set {skDemand.Banner::%arg 1%} to player
+		add 1 to {skDemand.Staff.Log::%player%}
+		kick the arg 1 due to "&cBanned for: &a%arg 2%&c."
+		loop all players:
+			if loop-player has permission "skDemand.staffsee":
+				send "&a%arg 1% &6has been banned! For: &a%arg 2% &6By: &aconsole&6." to loop-player
+
+#Temp ban
+command /tempban <offline player> <text> <timespan>:
+	permission: skDemand.tempban
+	trigger:
+		set {skDemand.TempBan::%arg 1%} to arg 3
+		set {skDemand.TempBan.Reason::%arg 1%} to arg 2
+		set {skDemand.TempBan.Time::%arg 1%} to now
+		set {skDemand.TempBanner::%arg 1%} to player
+		add 1 to {skDemand.Staff.Log::%player%}
+		send "&6You temporary banned &a%arg 1% &6for &a%arg 3%&6. Reason: &a%arg 2%&6."
+		make console execute command "/cbc %arg 1%"
+		loop all players:
+			if loop-player has permission "skDemand.staffsee":
+				send "&a%arg 1% &6has been banned! For: &a%arg 2% &6By: &a%player%&6. Duration: &a%{skDemand.TempBan::%arg 1%}%&6." to loop-player
+				
+#Temp ban console version
+command /ctempban <offline player> <text> <timespan>:
+	executable by: console
+	trigger:
+		set {skDemand.TempBan::%arg 1%} to arg 3
+		set {skDemand.TempBan.Reason::%arg 1%} to arg 2
+		set {skDemand.TempBan.Time::%arg 1%} to now
+		set {skDemand.TempBanner::%arg 1%} to "Console"
+		add 1 to {skDemand.Staff.Log::%player%}
+		send "&6You temporary banned &a%arg 1% &6for &a%arg 3%&6. Reason: &a%arg 2%&6."
+		make console execute command "/cbc %arg 1%"
+		loop all players:
+			if loop-player has permission "skDemand.staffsee":
+				send "&a%arg 1% &6has been banned! For: &a%arg 2% &6By: &aConsole&6. Duration: &a%{skDemand.TempBan::%arg 1%}%&6." to loop-player
+					
+on connect:
+	wait 1 tick
+	make console execute command "/cbc %player%"
+				
+#Bancheck Console
+command /cbc <offline player>:
+	executable by: console
+	trigger:
+		if {skDemand.Banned::%arg 1%} is set:
+			kick the arg 1 due to "&cBanned for: &a%{skDemand.Banned.Reason::%arg 1%}%&c. %newline% %newline%{@Server.Ban.Message}"
+			stop
+		if {skDemand.TempBan::%arg 1%} is set:
+			set {_tempban} to  difference between now and {skDemand.TempBan.Time::%arg 1%}
+			reduce {_tempban} by {skDemand.TempBan::%arg 1%}
+			if difference between now and {skDemand.TempBan.Time::%arg 1%} is bigger than {skDemand.TempBan::%arg 1%}:
+				make console execute command "/cunban %arg 1%"
+			if difference between now and {skDemand.TempBan.Time::%arg 1%} is smaller than {skDemand.TempBan::%arg 1%}:
+				set {_timeleft} to  difference between now and {skDemand.TempBan.Time::%arg 1%}
+				set  {_timelefttime} to {skDemand.TempBan::%arg 1%}
+				reduce {_timelefttime} by {_timeleft}
+				kick arg 1 due to "&cYou are temporary banned for: &a&o%{skDemand.TempBan.Reason::%arg 1%}% %newline% &cTime left until unban: &a&o%{_timelefttime}%   %newline% {@Server.Unintentional.Message} %newline% %newline% {@Server.Ban.Message}"
+		if {skDemand.TempMute::%arg 1%} is set:
+			set {_tempmute} to  difference between now and {skDemand.TempMute.Time::%arg 1%}
+			reduce {_tempmute} by {skDemand.TempMute::%arg 1%}
+			if difference between now and {skDemand.TempMute.Time::%arg 1%} is bigger than {skDemand.TempMute::%arg 1%}:
+				make console execute command "/cunmute %arg 1%"
+			if difference between now and {skDemand.TempMute.Time::%arg 1%} is smaller than {skDemand.TempMute::%arg 1%}:
+				set {_timeleft} to  difference between now and {skDemand.TempMute.Time::%arg 1%}
+				set  {_timelefttime} to {skDemand.TempMute::%arg 1%}
+				reduce {_timelefttime} by {_timeleft}
+				
+#Unban
+command /unban <offline player>:
+	permission: skDemand.unban
+	trigger:
+		if {skDemand.TempBan::%arg 1%} is set:
+			clear {skDemand.TempBan::%arg 1%}
+			clear {skDemand.TempBan.Time::%arg 1%}
+			clear {skDemand.TempBan.Reason::%arg 1%}
+			clear {skDemand.TempBanner::%arg 1%}
+			loop all players:
+				if loop-player have permission "skDemand.staffsee":
+					send "&6The ban for &a%arg 1% &6has been lifted!" to loop-player
+		if {skDemand.Banned::%arg 1%} is set:
+			clear {skDemand.Banned::%arg 1%}
+			clear {skDemand.Banned.Reason::%arg 1%}
+			clear {skDemand.Banner::%arg 1%}
+			loop all players:
+				if loop-player have permission "skDemand.staffsee":
+					send "&6The ban for &a%arg 1% &6has been lifted!" to loop-player
+		unban arg 1
+					
+#Unban console version
+command /cunban <offline player>:
+	executable by: console
+	trigger:
+		if {skDemand.TempBan::%arg 1%} is set:
+			clear {skDemand.TempBan::%arg 1%}
+			clear {skDemand.TempBan.Time::%arg 1%}
+			clear {skDemand.TempBan.Reason::%arg 1%}
+			clear {skDemand.TempBanner::%arg 1%}
+			loop all players:
+				if loop-player have permission "skDemand.staffsee":
+					send "&6The ban for &a%arg 1% &6has been lifted!" to loop-player
+		if {skDemand.Banned::%arg 1%} is set:
+			clear {skDemand.Banned::%arg 1%}
+			clear {skDemand.Banned.Reason::%arg 1%}
+			clear {skDemand.Banner::%arg 1%}
+			loop all players:
+				if loop-player have permission "skDemand.staffsee":
+					send "&6The ban for &a%arg 1% &6has been lifted!" to loop-player
+		unban arg 1
+	
+#Socialspy
+command /socialspy:
+	permission: skDemand.socialspy
+	trigger:
+		if {skDemand.SocialSpy::%player%} is not set:
+			set {skDemand.SocialSpy::%player%} to player
+			send "&7You are now socialspying."
+		else: #If the player already have it on
+			clear {skDemand.SocialSpy::%player%}
+			send "&7You are no longer socialspying."
+			
+#Mute
+command /mute <offline player> [<text=Breaking chat rules>]:
+	aliases: /silence
+	permission: skDemand.mute
+	trigger:
+		set {skDemand.Chat.Muted::%arg 1%} to arg 2
+		add 1 to {skDemand.Mutes::%player%}
+		send "&6%display name of arg 1% has been muted for %arg 2%."
+		send "&cYou have been muted for %arg 2% by %display name of player%." to arg 1
+		loop all players:
+			if loop-player has permission "skDemand.staffsee":
+				if loop-player is not player:
+					send "&c%arg 1% has been muted because of: &a%arg 2%" to loop-player
+					
+#Mute console version
+command /cmute <offline player> [<text=Breaking chat rules>]:
+	executable by: console
+	trigger:
+		set {skDemand.Chat.Muted::%arg 1%} to arg 2
+		add 1 to {skDemand.Mutes::%player%}
+		send "&6%display name of arg 1% has been muted for %arg 2%."
+		send "&cYou have been muted for %arg 2% by %display name of player%." to arg 1
+		loop all players:
+			if loop-player has permission "skDemand.staffsee":
+				if loop-player is not player:
+					send "&c%arg 1% has been muted because of: &a%arg 2%" to loop-player
+					
+#Temp Mute
+command /tempmute <player> <time span>:
+	permission: skDemand.tempmute
+	trigger:
+		set {skDemand.Chat.Muted::%arg 1%} to arg 1
+		add 1 to {skDemand.Mutes::%player%}
+		set {skDemand.TempMute::%arg 1%} to arg 2
+		set {skDemand.TempMute.Time::%arg 1%} to now
+		send "&6%display name of arg 1% has been temp-muted for %arg 2%."
+		send "&cYou have been temp-muted by %display name of player% for %arg 2%." to arg 1
+		loop all players:
+			if loop-player has permission "skDemand.staffsee":
+				if loop-player is not player:
+					send "&c%arg 1% has been temp-muted for %arg 2%." to loop-player
+					
+#Temp Mute console version
+command /ctempmute <player> <time span>:
+	executable by: console
+	trigger:
+		set {skDemand.Chat.Muted::%arg 1%} to arg 1
+		add 1 to {skDemand.Mutes::%player%}
+		set {skDemand.TempMute::%arg 1%} to arg 2
+		set {skDemand.TempMute.Time::%arg 1%} to now
+		send "&6%display name of arg 1% has been temp-muted for %arg 2%."
+		send "&cYou have been temp-muted by %display name of player% for %arg 2%." to arg 1
+		loop all players:
+			if loop-player has permission "skDemand.staffsee":
+				if loop-player is not player:
+					send "&c%arg 1% has been temp-muted for %arg 2%." to loop-player
+					
+	
+#Unmute
+command /unmute <offline player>:
+	permission: skDemand.unmute
+	usage: /unmute <player>
+	trigger:
+		if {skDemand.Chat.Muted::%arg 1%} is not set:
+			send "&cThis player is not muted."
+			stop
+		delete {skDemand.Chat.Muted::%arg 1%}
+		clear {skDemand.TempMute.Time::%arg 1%}
+		clear {skDemand.TempMute::%arg 1%}
+		send "&6%arg 1% has been unmuted."
+		send "&cYou have been unmuted by %display name of player%." to arg 1
+		
+#Unmute console version
+command /cunmute <offline player>:
+	executable by: console
+	trigger:
+		if {skDemand.Chat.Muted::%arg 1%} is not set:
+			send "&cThis player is not muted."
+			stop
+		delete {skDemand.Chat.Muted::%arg 1%}
+		clear {skDemand.TempMute.Time::%arg 1%}
+		clear {skDemand.TempMute::%arg 1%}
+		send "&6%arg 1% has been unmuted."
+		send "&cYou have been unmuted by %display name of player%." to arg 1
+		
+# subfold #![<Economy & XP & Enchant>]
+#Give & Take XP
+command /exp <text> <player> [<number>]:
+	trigger:
+		if arg 1 is "give":
+			if player have permission "skDemand.expgive":
+				add arg 3 to arg 2's level
+				send "&6You gave &a%arg 3% &6levels to &a%arg 2%&6."
+				send "&6You've got &a%arg 3% &6levels." to arg 2
+				if arg 2's level is greater than 32000:
+					set arg 2's level to 32000
+		if arg 1 is "take":
+			if player have permission "skDemand.exptake":
+				remove arg 3 from arg 2's level
+				send "&6You took &a%arg 3% &6levels from &a%arg 2%&6."
+				send "&6You've lost &a%arg 3% &6levels." to arg 2
+		if arg 1 is "reset":
+			if player have permission "skDemand.expreset":
+				set arg 2's level to 0
+				send "&6You reseted &a%arg 2%&6's levels."
+				send "&6Your levels have been reset." to arg 2
+		
+#Give & Take XP Console version
+command /cexp <text> <player> <number>:
+	executable by: console
+	trigger:
+		if arg 1 is "give":
+			add arg 3 to arg 2's level
+			send "&6You gave &a%arg 3% &6levels to &a%arg 2%&6."
+			send "&6You've got &a%arg 3% &6levels." to arg 2
+			if arg 2's level is greater than 32000:
+				set arg 2's level to 32000
+		if arg 1 is "take":
+			remove arg 3 from arg 2's level
+			send "&6You took &a%arg 3% &6levels from &a%arg 2%&6."
+			send "&6You've lose &a%arg 3% &6levels." to arg 2
+		if arg 1 is "reset":
+			set arg 2's level to 0
+			send "&6You reseted &a%arg 2%&6's levels."
+			send "&6Your levels have been reset." to arg 2
+
+#No negative money
+on skript start:
+	loop {skDemand.Balance::*}:
+		if loop-value is less than 0:
+			set {skDemand.Balance::%loop-index%} to 0
+	
+#Give & Take Money
+command /eco <text> <player> [<number>]:
+	executable by: players
+	trigger:
+		if arg 1 is "give":
+			if player have permission "skDemand.ecogive":
+				set {skDemand.Balance::%arg 2%} to {skDemand.Balance::%arg 2%}+arg 3
+				send "&aYou added %arg 3%$ to %arg 2%'s balance."
+				send "&aYou got %arg 3%$ given to you." to arg 2
+		if arg 1 is "take":
+			if player have permission "skDemand.ecotake":
+				set {skDemand.Balance::%arg 2%} to {skDemand.Balance::%arg 2%}-arg 3
+				send "&6You removed &a%arg 3%$ &6from &a%arg 2%&6's balance."
+				send "&6You lose &a%arg 3%$&6." to arg 2
+		if arg 1 is "reset":
+			if player have permission "skDemand.ecoreset":
+				clear {skDemand.Balance::%arg 2%}
+				send "&6You reseted &a%arg 2%&6's balance."
+				send "&6Your balance has been reset." to arg 2
+		make score of "&7▷ &a%{skDemand.Balance::%arg 2%}%&7$" in board of arg 2 to -12
+				
+command /ceco <text> <player> [<number>]:
+	executable by: console
+	trigger:
+		if arg 1 is "give":
+			set {skDemand.Balance::%arg 2%} to {skDemand.Balance::%arg 2%}+arg 3
+			send "&aYou added %arg 3%$ to %arg 2%'s balance."
+			send "&aYou got %arg 3%$ given to you." to arg 2
+		if arg 1 is "take":
+			set {skDemand.Balance::%arg 2%} to {skDemand.Balance::%arg 2%}-arg 3
+			send "&6You removed &a%arg 3%$ &6from &a%arg 2%&6's balance."
+			send "&6You lose &a%arg 3%$&6." to arg 2
+		if arg 1 is "reset":
+			clear {skDemand.Balance::%arg 2%}
+			send "&6You reseted &a%arg 2%&6's balance."
+			send "&6Your balance has been reset." to arg 2
+		make score of "&7▷ &a%{skDemand.Balance::%arg 2%}%&7$" in board of arg 2 to -12
+			
+				
+#Get & Send Money
+command /pay <player> <number>:
+	permission: skDemand.pay
+	trigger:
+		if arg 1 is set:
+			if arg 2 is set:
+				if arg 2 is greater or equal to 1:
+					if {skDemand.Balance::%Player%} is higher than or equal to arg 2:
+						remove arg 2 from {skDemand.Balance::%player%}
+						add arg 2 to {skDemand.Balance::%arg 1%}
+						send "&aYou paid %arg 1% with %arg 2%$"
+						make score of "&7▷ &a%{skDemand.Balance::%player%}%&7$" in board of player to -12
+						send "&aYou got paid %arg 2%$ by %player%." to arg 1
+						make score of "&7▷ &a%{skDemand.Balance::%arg 1%}%&7$" in board of arg 1 to -12
+					else:
+						send "&cYou don't have enough $ to pay that much."
+
+#Balance
+command /bal [<offlineplayer>]:
+	permission: skDemand.bal
+	aliases: /balance, /money, /cash
+	trigger:
+		if arg 1 is not set:
+			send "&6Your balance is &a%{skDemand.Balance::%player%}%$&6."
+			make score of "&7▷ &a%{skDemand.Balance::%player%}%&7$" in board of player to -12
+		if arg 1 is set:
+			send "&a%arg 1%'s &6balance is &a%{skDemand.Balance::%arg 1%}%$&6."
+			
+on join:
+	if player hasn't played before:
+		set {skDemand.Balance::%player%} to {@Starter.Money}
+		send "&aYour balance has been set to: %{skDemand.Balance::%player%}%"
+
+command /baltop:
+	permission: skDemand.baltop
+	aliases: /balancetop, /moneytop, /cashtop
+	trigger:
+		broadcast {skDemand.Balance::*}
+		loop {skDemand.Balance::*}:
+			set {_playerlist::%loop-index%} to loop-value
+		loop 10 times:
+			set {_check} to {_check}+1
+			set {_top.balance} to random element out of {_playerlist::*}
+			clear {_through}
+			loop {_playerlist::*}:
+				if {_through} is not set:
+					if loop-value-2 is {_top.balance}:
+						set {_top.player::%loop-index%} to loop-index
+						set {_through} to true
+			loop {_playerlist::*}:
+				{_top.player::%loop-index%} is not set 
+				if {_top.balance} is equal to loop-value-2:
+					set {_top.player::%loop-index%} to loop-index
+				if {_top.balance} is less than loop-value-2:
+					clear {_top.player::*}
+					set {_top.balance} to loop-value-2
+					set {_top.player::%loop-index%} to loop-index
+			set {_random} to random element out of {_top.player::*}
+			set {_toplist::%{_check}%} to {_random}
+			clear {_top.player::*}
+			clear {_top.balance}
+			clear {_playerlist::%{_random}%}
+			clear {_random}
+		send "&2[&a----&2Balance Top List&a----&2]"
+		loop {_toplist::*}:
+			send " &2%loop-index%. &c%loop-value% &a= &b%{skDemand.Balance::%loop-value%}%$"
+			
+
+#Buy Signs
+On Sign Change:
+	if line 1 is "[Buy]":
+		if player doesn't have permission "skDemand.buy.sign.create":
+			cancel event
+			stop
+		set {_line1} to line 1
+		set {_line2} to line 2 parsed as number
+		set {_line3} to line 3 parsed as item
+		set {_line4} to line 4 parsed as number
+		set line 1 to "&1%line 1%"
+		set line 2 to "&d%line 2%"
+		set line 3 to "&3%line 3%"
+		set line 4 to "&b%line 4%&6$"
+		send "Buy sign created."
+		stop
+
+on click on sign:
+	if line 1 is "&1[Buy]":
+		replace "<gold>$" with "" in line 4
+		replace "<light cyan>" with "" in line 4
+		replace "<Dark Aqua>" with "" in line 3
+		replace "<Light Purple>" with "" in line 2
+		set {_line2} to line 2 parsed as number
+		set {_line4} to line 4 parsed as number
+		if line 3 is "exp" or "xp":
+			if {skDemand.Balance::%player%} is higher than or equal to {_line4}:
+				subtract {_line4} from {skDemand.Balance::%player%}
+				make score of "&7▷ &a%{skDemand.Balance::%player%}%&7$" in board of player to -12
+				add {_line2} to player's level
+				set line 4 to "&b%line 4%&6$"
+				set line 3 to "&3%line 3%"
+				set line 2 to "&d%line 2%"
+				if {_line2} is higher than 1:
+					send "&aYou've bought %{_line2}% levels for %{_line4}%&6$&a!"
+				else:
+					send "&aYou've bought %{_line2}% level for %{_line4}%&6$&a!"
+				stop
+		set {_line3} to line 3 parsed as item
+		if {skDemand.Balance::%player%} is higher than or equal to {_line4}:
+			subtract {_line4} from {skDemand.Balance::%player%}
+			make score of "&7▷ &a%{skDemand.Balance::%player%}%&7$" in board of player to -12
+			give {_line2} of {_line3} to the player
+			send "&aYou've bought %{_line3}% of %{_line2}% for %{_line4}%&6$&a!"
+			set line 4 to "&b%line 4%&6$"
+			set line 3 to "&3%line 3%"
+			set line 2 to "&d%line 2%"
+			stop
+		else:
+			send "&cYou don't have enough money!"
+			set line 4 to "&b%line 4%&6$"
+			set line 3 to "&3%line 3%"
+			set line 2 to "&d%line 2%"
+			stop
+			
+#Sell Signs
+On Sign Change:
+	if line 1 is "[Sell]":
+		if player doesn't have permission "skDemand.sell.sign.create":
+			cancel event
+			stop
+		set {_line1} to line 1
+		set {_line2} to line 2 parsed as number
+		set {_line3} to line 3 parsed as item
+		set {_line4} to line 4 parsed as number
+		set line 1 to "&1%line 1%"
+		set line 2 to "&d%line 2%"
+		set line 3 to "&3%line 3%"
+		set line 4 to "&b%line 4%&6$"
+		send "Sell sign created."
+		stop
+
+on click on sign:
+	if line 1 is "&1[Sell]":
+		replace "<gold>$" with "" in line 4
+		replace "<light cyan>" with "" in line 4
+		replace "<Dark Aqua>" with "" in line 3
+		replace "<Light Purple>" with "" in line 2
+		set {_line2} to line 2 parsed as number
+		set {_line3} to line 3 parsed as item
+		set {_line4} to line 4 parsed as number
+		if player have {_line2} of {_line3}:
+			add {_line4} to {skDemand.Balance::%player%}
+			make score of "&7▷ &a%{skDemand.Balance::%player%}%&7$" in board of player to -12
+			remove {_line2} of {_line3} from the player
+			send "&aYou've sold %{_line3}% of %{_line2}% for %{_line4}%&6$&a!"
+			set line 4 to "&b%line 4%&6$"
+			set line 3 to "&3%line 3%"
+			set line 2 to "&d%line 2%"
+			stop
+		else:
+			send "&cYou don't have enough items!"
+			set line 4 to "&b%line 4%&6$"
+			set line 3 to "&3%line 3%"
+			set line 2 to "&d%line 2%"
+			stop
+	
+#Enchantment Signs
+options:
+	Enchant-Upgrade: true
+
+on sign change:
+	if line 1 is "[Enchant]":
+		set {_line1} to line 1
+		set {_line2} to line 2 parsed as enchantment type
+		set {_line4} to line 4 parsed as number
+		set line 1 to "&1%line 1%"
+		set line 2 to "&d%line 2%"
+		set line 4 to "&6$&b%line 4%"
+		send "Enchant sign created."
+		stop
+		
+on rightclick on sign:
+	if line 1 contains "[Enchant]":
+		cancel event
+		set {_line2} to line 2
+		set {_line4} to line 4 
+		replace "<gold>$" with "" in {_line4}
+		replace "<light cyan>" with "" in {_line4}
+		replace "<Light Purple>" with "" in {_line2}
+		set {_line4} to {_line4} parsed as number
+		if {skDemand.Balance::%player%} is higher than or equal to {_line4}:
+			set {_weapon} to player's tool
+			if {@Enchant-Upgrade} is true:
+	#Sword
+				if {_line2} contains "sharpness" or "knockback" or "fireaspect":
+					player is holding a sword
+					if {_line2} is "sharpness 1":
+						tool is enchanted with sharpness 1 or sharpness 2 or sharpness 3 or sharpness 4 or sharpness 5:
+							send "&cYou already have sharpness 1 or higher!"
+							stop
+						enchant tool with sharpness 1
+					if {_line2} is "sharpness 2":
+						tool is enchanted with sharpness 2 or sharpness 3 or sharpness 4 or sharpness 5:
+							send "&cYou already have sharpness 2 or higher!"
+							stop
+						tool is not enchanted with sharpness 1:
+							send "&cYou require sharpness 1 to upgrade this!"
+							stop
+						enchant tool with sharpness 2
+					if {_line2} is "sharpness 3":
+						tool is enchanted with sharpness 3 or sharpness 4 or sharpness 5:
+							send "&cYou already have sharpness 3 or higher!"
+							stop
+						tool is not enchanted with sharpness 2:
+							send "&cYou require sharpness 2 to upgrade this!"
+							stop
+						enchant tool with sharpness 3
+					if {_line2} is "fireaspect 1":
+						tool is enchanted with fire aspect 1 or fire aspect 2:
+							send "&cYou already have fire aspect 1 or higher!"
+							stop
+						enchant tool with fire aspect 1
+					if {_line2} is "knockback 1":
+						tool is enchanted with knockback 1 or knockback 2:
+							send "&cYou already have knockback 1 or higher!"
+							stop
+						enchant tool with knockback 1
+					send "&aYou have enchanted your weapon with %{_line2}%!"
+					remove {_line4} from {skDemand.Balance::%player%}
+	#Armour
+				if {_line2} contains "protection" or "projprot" or "fireprot" or "thorns" or "unbreaking":
+					player is holding a helmet or chestplate or leggings or boots
+					if {_line2} is "projprot 1":
+						tool is enchanted with projectile protection 1 or projectile protection 2 or projectile protection 3 or projectile protection 4:
+							send "&cYou already have projectile protection 1 or higher!"
+							stop
+						enchant tool with projectile protection 1
+					if {_line2} is "projprot 2":
+						tool is enchanted with projectile protection 2 or projectile protection 3 or projectile protection 4:
+							send "&cYou already have projectile protection 2 or higher!"
+							stop
+						tool is not enchanted with projectile protection 1:
+							send "&cYou require projectile protection 1 to upgrade this!"
+							stop
+						enchant tool with projectile protection 2
+						
+					if {_line2} is "fireprot 1":
+						tool is enchanted with fire protection 1 or fire protection 2 or fire protection 3 or fire protection 4:
+							send "&cYou already have fire protection 1 or higher!"
+							stop
+						enchant tool with fire protection 1
+					if {_line2} is "fireprot 2":
+						tool is enchanted with fire protection 2 or fire protection 3 or fire protection 4:
+							send "&cYou already have fire protection 2 or higher!"
+							stop
+						tool is not enchanted with fire protection 1:
+							send "&cYou require fire protection 1 to upgrade this!"
+							stop
+						enchant tool with fire protection 2
+						
+					if {_line2} is "Thorns 1":
+						tool is enchanted with Thorns 1 or Thorns 2 or Thorns 3 or Thorns 4:
+							send "&cYou already have Thorns 1 or higher!"
+							stop
+						enchant tool with Thorns 1
+					if {_line2} is "Thorns 2":
+						tool is enchanted with Thorns 2 or Thorns 3 or Thorns 4:
+							send "&cYou already have Thorns 2 or higher!"
+							stop
+						tool is not enchanted with Thorns 1:
+							send "&cYou require Thorns 1 to upgrade this!"
+							stop
+						enchant tool with Thorns 2
+						
+					if {_line2} is "unbreaking 1":
+						tool is enchanted with unbreaking 1 or unbreaking 2 or unbreaking 3 or unbreaking 4:
+							send "&cYou already have unbreaking 1 or higher!"
+							stop
+						enchant tool with unbreaking 1
+					if {_line2} is "unbreaking 2":
+						tool is enchanted with unbreaking 2 or unbreaking 3 or unbreaking 4:
+							send "&cYou already have unbreaking 2 or higher!"
+							stop
+						tool is not enchanted with unbreaking 1:
+							send "&cYou require unbreaking 1 to upgrade this!"
+							stop
+						enchant tool with unbreaking 2
+						
+					send "&aYou have enchanted your armour with %{_line2}%!"
+					remove {_line4} from {skDemand.Balance::%player%}
+	#Bow
+				if player is holding a bow:
+					if {_line2} is "power 1":
+						tool is enchanted with power 1 or power 2 or power 3 or power 4 or power 5:
+							send "&cYou already have power 1 or higher!"
+							stop
+						enchant tool with power 1
+					if {_line2} is "power 2":
+						tool is enchanted with power 2 or power 3 or power 4 or power 5:
+							send "&cYou already have power 2 or higher!"
+							stop
+						tool is not enchanted with power 1:
+							send "&cYou require power 1 to upgrade this!"
+							stop
+						enchant tool with power 2
+					if {_line2} is "power 3":
+						tool is enchanted with power 3 or power 4 or power 5:
+							send "&cYou already have power 3 or higher!"
+							stop
+						tool is not enchanted with power 2:
+							send "&cYou require power 2 to upgrade this!"
+							stop
+						enchant tool with power 3
+					if {_line2} is "punch 1":
+						tool is enchanted with punch 1 or punch 2:
+							send "&cYou already have punch 1 or higher!"
+							stop
+						enchant tool with punch 1
+					if {_line2} is "infinity 1":
+						tool is enchanted with infinity 1:
+							send "&cYou already have infinity!"
+							stop
+						enchant tool with infinity 1
+					if {_line2} is "flame 1":
+						tool is enchanted with flame 1:
+							send "&cYou already have flame 1!"
+							stop
+						enchant tool with flame 1
+					send "&aYou have enchanted your bow with %{_line2}%!"
+					remove {_line4} from {skDemand.Balance::%player%}
+			else:
+				enchant tool with {_line2}
+				send "&aYou have enchanted your %player's tool% with %{_line2}%!"
+				remove {_line4} from {skDemand.Balance::%player%}
+		else:
+			send "&cYou don't have enough money!"
+			stop
+				
+
+		
+#Disabled until bug fixed (MazzaTR)
+#on rightclick on sign:
+#	if line 1 contains "[Enchant]":
+#		set {_line2} to line 2
+#		set {_line4} to line 4 
+#		replace "&6$" with "" in {_line4}
+#		replace "&b" with "" in {_line4}
+#		replace "&d" with "" in {_line2}
+#		if {_line4} is greater than {skDemand.Balance::%player%}:
+#			message "&cYou don't have enough money!"
+#			stop
+#		replace "projprot" with "Projectile Protection" in {_line2}
+#		replace "fireprot" with "Fire Protection" in {_line2}
+#		replace "blastprot" with "Blast Protection" in {_line2}
+#		set {_line2.splinted::*} to {_line2} split at " "
+#		loop {_line2.splinted::*}:
+#			if loop-value is not "1" or "2" or "3" or "4" or "5":
+#				set {_enchantment.wanted} to loop-value parsed as enchantment type
+#				broadcast "enchantment wanted: %{_enchantment.wanted}%"
+#			if loop-value is "1" or "2" or "3" or "4" or "5":
+#				set {_line2.level} to loop-value
+#				broadcast "Level on line 2: %{_line2.level}%"
+#
+#		if  player's tool is enchanted:
+#			set {_enchanted.level} parsed as an number to player's tool's level of enchant {_enchantment.wanted}
+#		else:
+#			set {_enchanted.level} to "0"
+#		if {@Enchant-Upgrade} is true:
+#			set {_enchanted.level} to {_enchanted.level}-{_line2.level}
+#			if {_enchanted.level} is "-1":
+#				broadcast "%{_enchanted.level}%"
+#				stop
+#Bow
+#		if player is holding a bow:
+#			enchant tool with {_line2}
+#			send "&aYou have enchanted your bow with %{_line2}%!"
+#			remove {_line4} from {skDemand.Balance::%player%}
+#Sword
+#		if {_line2} contains "sharpness" or "knockback" or "fireaspect" or "Smite" or "Bane of Arthropods" or "Looting":
+#			player is holding a sword or axe
+#			enchant tool with {_line2}
+#			send "&aYou have enchanted your weapon with %{_line2}%!"
+#			remove {_line4} from {skDemand.Balance::%player%}
+#Armour
+#		if {_line2} contains "protection" or "projprot" or "fireprot" or "blastprot" or "Thorns":
+#			player is holding a helmet or chestplate or leggings or boots
+#			enchant tool with {_line2}
+#			send "&aYou have enchanted your armour with %{_line2}%!"
+#			remove {_line4} from {skDemand.Balance::%player%}
+#Boots
+#		if {_line2} contains "featherfall":
+#			player is holding boots
+#			enchant tool with {_line2}
+#			send  "&aYou have enchanted your boots with %{_line2}%!"
+
+#Repair signs
+On Sign Change:
+	if line 1 is "[Repair]":
+		if player doesn't have permission "skDemand.repair.sign.create":
+			cancel event
+			stop
+		if line 2 is not "All" or "Hand":
+			send "Line 2 must be ""All"" or ""Hand""!"
+			cancel event
+			stop
+		set {_line1} to line 1
+		set {_line2} to line 2 parsed as text
+		set {_line4} to line 4 parsed as number
+		set line 1 to "&1%line 1%"
+		set line 2 to "&d%line 2%"
+		set line 4 to "&b%line 4%&6$"
+		send "Repair sign created."
+		stop
+		
+on click on sign:
+	if line 1 is "&1[Repair]":
+		cancel event
+		set {_line2} to line 2 parsed as text
+		set {_line4} to line 4 parsed as text
+		replace "<light purple>" with "" in {_line2}
+		replace "<light cyan>" with "" in {_line4}
+		replace "<gold>$" with "" in {_line4}
+		set {_line4} to {_line4} parsed as number
+		if {skDemand.Balance::%player%} is higher than or equal to {_line4}:
+			if {_line2} is "Hand":
+				if player is holding a any helmet or any chestplate or any leggings or any boots or any sword or bow:
+					remove {_line4} from {skDemand.Balance::%player%}
+					send "&aYou've repaired your &b%player's tool%&a!"
+					repair player's tool
+					stop
+				else:
+					send "&cYou must hold a weapon or armour!"
+					stop
+			if line 2 is "All":
+				remove {_line4} from {skDemand.Balance::%player%}
+				set {_count} to 0
+				loop 36 times:
+					set {_inv.%{_count}%} to slot {_count} of player's inventory
+					repair {_inv.%{_count}%}
+					add 1 to {_count}
+				repair helmet of player
+				repair chestplate of player
+				repair leggings of player
+				repair boots of player
+				send "&aAll Items Repaired."
+		else:
+			send "&cYou don't have enough money!"
+			stop
+			
+# subfold #![<Building & Related stuff>]
+#Spawn mob
+command /mob <entity type> [<integer>]:
+	aliases: /spawnmob
+	description: Spawns 1 mob or a certain amount
+	permission: skDemand.spawnmob
+	trigger:
+		if arg 2 is set:
+			spawn arg 2 of arg 1 at block 2 above targeted block
+			stop
+		if arg 2 is not set:
+			spawn arg 1 at block 2 above targeted block
+		if arg 1 is not set:
+			send "&6Cow,Sheep,Horse,Giant,Zombie,Skeleton,Spider,Cave Spider,Ghast,Enderdragon."
+			
+#Itemdb
+command /itemdb:
+	permission: skDemand.itemdb
+	description: Shows the id & data value of the hold block or item
+	trigger:
+		send "&6The ID of hold block or item is &a%id of player's tool%:%data value of player's tool%&6."
+		send "&6The name of hold block or item is &a%player's tool%&6."
+		
+#Item Give
+command /i <item> [<integer>]:
+	aliases: /item, /items, /give, /get
+	description: Gives you a item or a certain amount of itmes
+	permission: skDemand.give
+	trigger:
+		if arg 2 is not set:
+			give arg 1 to player
+			stop
+		loop arg 2 times:
+			give arg 1 to player
+		send "&6Giving &a%arg 2% %arg 1%('s)&6."
+		
+#Skull give
+command /head <text>:
+	aliases: /skull
+	permission:	skDemand.skull.get
+	trigger:
+		set {_head} to "%arg 1%" parsed as offline player
+		give 1 of {_head}'s skull named "%{_head}%" to player
+		
+on place of head:
+	set {_head} to name of the player's tool parsed as offline player
+	set block at event-location to {_head}'s skull
+		
+#Time set
+command /time [<text>]:
+	aliases: /day, /night
+	permission: skDemand.time
+	description: Shows the time & Sets the time
+	trigger:
+		if arg 1 is not set:
+			send "&6The time of &a%world of player% &6is &a%world of player's time%&6."
+		else if player have permission "skDemand.settime":
+			if arg 1 is "day":
+				set time in world of player to 8:00
+				send "&6Time set to &aday&6."
+			else if arg 1 is "night":
+				set time in world of player to 20:30
+				send "&6Time set to &aspooky frikin night&6."
+			else if arg 1 is "dawn":
+				set time in world of player to 05:10
+				send "&6Time set to &adawn&6."
+			set {_time} to arg 1 parsed as time
+			set time in world of player to {_time}
+				
+#Gamemode
+command /gm <integer> [<player>]:
+	aliases: /gamemode
+	permission: skDemand.gm
+	trigger:
+		if arg 2 is not set:
+			if arg 1 is 1:
+				set the gamemode of the player to creative
+				send "&6You have changed your gamemode to &aCreative&6."
+			else if arg 1 is 0:
+				set the gamemode of the player to survival
+				send "&6You have changed your gamemode to &aSurvival&6."
+			else if arg 1 is 2:
+				set the gamemode of the player to adventure
+				send "&6You have changed your gamemode to &aAdventure&6."
+		else if arg 2 is set:
+			if arg 1 is 1:
+				set the gamemode of arg 2 to creative
+				send "&a%name of player% &6has changed your gamemode to &aCreative&6." to arg 2
+				send "&a%arg 2%'s &6gamemode has been changed to &aCreative&6."
+			else if arg 1 is 0:
+				set the gamemode of arg 2 to survival
+				send "&a%name of player% &6has changed your gamemode to &aSurvival&6." to arg 2
+				send "&a%arg 2%'s &6gamemode has been changed to &aSurvival&6."
+			else if arg 1 is 2:
+				set the gamemode of arg 2 to adventure
+				send "&a%name of player% &6has changed your gamemode to &aAdventure&6." to arg 2
+				send "&a%arg 2%'s &6gamemode has been changed to &aAdventure&6."
+				
+#Position
+command /position:
+	aliases: /getpos, /coords, /compass, /depth
+	description: Shows the player's position
+	permission: skDemand.position
+	trigger:
+		chance of 25%:
+			send "&6Press F3 Noob."
+			stop
+		send "&6%location of the player%"
+			
+#Weather
+command /weather [<text>]:
+	permission: skDemand.weather
+	description: Sets the weather & Shows the weather
+	trigger:
+		if arg 1 is "rain" or "rainy":
+			set weather to rain
+		else if arg 1 is "sun" or "sunny" or "nice" or "dry":
+			set weather to sun
+		else if arg 1 is "thunder" or "storm" or "thunderstorm" or "lightning":
+			set weather to thunder
+		else if arg 1 isn't set:
+			send "&6The weather is: &a%the weather in world%&6."
+			
+#Fly
+command /fly [<player>]:
+	trigger:
+		if arg 1 isn't set:
+			player have permission "skDemand.fly":
+				if {skDemand.Fly::%player%} is not set:
+					set fly mode of player to true
+					set {skDemand.Fly::%player%} to true
+					send "&6Fly toggled on."
+				else:
+					set fly mode of player to false
+					clear {skDemand.Fly::%player%}
+					send "&6Fly toggled off."
+		else if arg 1 is set:
+			player have permission "skDemand.flyother":
+				if {skDemand.Fly::%arg 1%} is not set:
+					set fly mode of arg 1 to true
+					set {skDemand.Fly::%arg 1%} to true
+					send "&6Fly toggled on for &a%arg 1%&6."
+					send "&6Fly toggled on." to arg 1
+				else:
+					set fly mode of arg 1 to false
+					clear {skDemand.Fly::%arg 1%}
+					send "&6Fly toggled off for &a%arg 1%&6."
+					send "&6Fly toggled off."
+			
+#Fly & Walk speed
+on join:
+	set the player's walk speed to 0.2
+	set the player's fly speed to 0.1
+
+command /speed  [<integer>]:
+	permission: skDemand.speed
+	description: Sets your walk & fly speed
+	trigger:
+		#The divide stuff is there because of skript isn't similar to essentials with setting speed.
+		if arg 1 isn't set:
+			set the player's walk speed to 1/5
+			set the player's fly speed to 1/8.2
+			send "&6Your fly & walk speed have been reset."
+			stop
+		player is flying:
+			if arg 1 is higher than 10:
+				send "&cMaximum speed is 10!"
+				stop
+			set the player's fly speed to arg 1/8.2
+			send "&6Your fly speed have been set to &a%arg 1%&6."
+		player is not flying:
+			if arg 1 is higher than 10:
+				send "&cMaximum speed is 10!"
+				stop
+			set the player's walk speed to arg 1/5
+			send "&6Your walk speed have been set to &a%arg 1%&6."
+			
+#Sign color & format
+on sign edit:
+	if player has permission "skDemand.sign.colour":
+		loop {skDemand.chat.Colour::*}:
+			replace all loop-index with loop-value in line 1
+			replace all loop-index with loop-value in line 2
+			replace all loop-index with loop-value in line 3
+			replace all loop-index with loop-value in line 4
+	if player has permission "skDemand.sign.format":
+		loop {skDemand.chat.Format::*}:
+			replace all loop-index with loop-value in line 1
+			replace all loop-index with loop-value in line 2
+			replace all loop-index with loop-value in line 3
+			replace all loop-index with loop-value in line 4
+		
+#Sign Edit
+command /signedit [<text>] [<text>]:
+	aliases: /se
+	permission: skDemand.signedit
+	trigger:
+		arg 1 is not set:
+			send "&6/se <1/2/3/4> <text> &b- Set a line to a text"
+			send "&6/se copy [2/3/4/5/...] &b- Copy a sign"
+		else if arg 1 is not "1" or "2" or "3" or "4" or "copy" or "stop":
+			send "&6/se <1/2/3/4> <text> &b- Set a line to a text"
+			send "&6/se copy [2/3/4/5/...] &b- Copy a sign"
+		else if arg 1 is "1":
+			arg 2 is set:
+				set {skDemand.se.editing.1::%player%} to true
+				set {skDemand.se.line1::%player%} to arg 2
+				send "&6[&7SE&6] &bClick a sign to edit"
+			else:
+				send "&bUse &6/se <1/2/3/4> <text>"
+		else if arg 1 is "2":
+			arg 2 is set:
+				set {skDemand.se.editing.2::%player%} to true
+				set {skDemand.se.line2::%player%} to arg 2
+				send "&6[&7SE&6] &bClick a sign to edit"
+			else:
+				send "&bUse &6/se <1/2/3/4> <text>"
+		else if arg 1 is "3":
+			arg 2 is set:
+				set {skDemand.se.editing.3::%player%} to true
+				set {skDemand.se.line3::%player%} to arg 2
+				send "&6[&7SE&6] &bClick a sign to edit"
+			else:
+				send "&bUse &6/se <1/2/3/4> <text>"
+		else if arg 1 is "4":
+			arg 2 is set:
+				set {skDemand.se.editing.4::%player%} to true
+				set {skDemand.se.line4::%player%} to arg 2
+				send "&6[&7SE&6] &bClick a sign to edit"
+			else:
+				send "&bUse &6/se <1/2/3/4> <text>"
+		else if arg 1 is "copy":
+			set {skDemand.se.copying::%player%} to true
+			arg 2 is set:
+				set {skDemand.se.copies::%player%} to arg 2 parsed as number
+			send "&6[&7SE&6] &bClick a sign to copy"
+		else if arg 1 is "stop":
+			delete {skDemand.se.pasting::%player%}
+			delete {skDemand.se.copies::%player%}
+			send "&6[&7SE&6] &bStopped pasting"
+
+on click on sign:
+	{skDemand.se.editing.1::%player%} is true:
+		cancel event
+		set line 1 to {skDemand.se.line1::%player%}
+		delete {skDemand.se.editing.1::%player%}
+		delete {skDemand.se.line1::%player%}
+	{skDemand.se.editing.2::%player%} is true:
+		cancel event
+		set line 2 to {skDemand.se.line2::%player%}
+		delete {skDemand.se.editing.2::%player%}
+		delete {skDemand.se.line2::%player%}
+	{skDemand.se.editing.3::%player%} is true:
+		cancel event
+		set line 3 to {skDemand.se.line3::%player%}
+		delete {skDemand.se.editing.3::%player%}
+		delete {skDemand.se.line1::%player%}
+	{skDemand.se.editing.4::%player%} is true:
+		cancel event
+		set line 4 to {skDemand.se.line4::%player%}
+		delete {skDemand.se.editing.4::%player%}
+		delete {skDemand.se.line1::%player%}
+	{skDemand.se.pasting::%player%} is true:
+		cancel event
+		set line 1 to {skDemand.se.line1::%player%}
+		set line 2 to {skDemand.se.line2::%player%}
+		set line 3 to {skDemand.se.line3::%player%}
+		set line 4 to {skDemand.se.line4::%player%}
+		{skDemand.se.copies::%player%} is a number:
+			remove 1 from {skDemand.se.copies::%player%}
+			{skDemand.se.copies::%player%} is 0:
+				delete {skDemand.se.pasting::%player%}
+				delete {skDemand.se.copies::%player%}
+				send "&6[&7SE&6] &bYou have no copies left"
+				stop
+			send "&6[&7SE&6] &b%{skDemand.se.copies::%player%}% copies left"
+		else:
+			send "&6[&7SE&6] &bPasted!"
+			send "&6[&7SE&6] &bUse &6/se stop &bto stop pasting"
+	{skDemand.se.copying::%player%} is true:
+		cancel event
+		set {skDemand.se.line1::%player%} to line 1
+		set {skDemand.se.line2::%player%} to line 2
+		set {skDemand.se.line3::%player%} to line 3
+		set {skDemand.se.line4::%player%} to line 4
+		send "&6[&7SE&6] &bClick a sign to paste"
+		{skDemand.se.copies::%player%} is set:
+			send "&6[&7SE&6] &b%{skDemand.se.copies::%player%}% copies remaining"
+		else:
+			send "&6[&7SE&6] &bUse &6/se stop &bto stop pasting"
+		set {skDemand.se.pasting::%player%} to true
+		delete {skDemand.se.copying::%player%}
+		
+# subfold #![<Communication>]
+#Me
+command /me <text>:
+	permission: skDemand.me
+	trigger:
+		set {_msg} to arg 1
+		invoke "Text.Go.Thru" from "%player%" and "%{_msg}%"
+		if {skDemand.Message::%player%} is set:
+			set {_msg} to {skDemand.Message::%player%}
+			clear {skDemand.Message::%player%}
+		else:
+			stop
+		broadcast "&6* &r%display name of player% %{_msg}%"
+
+#Chat Clear
+command /cc:
+	aliases: /chatclear, /clearchat
+	permission: skDemand.chatclear
+	trigger:
+		if command-executer is console:
+			stop
+		loop 150 times:
+			broadcast " "
+		wait 1 tick
+		broadcast "&nChat has been cleared"
+		broadcast " "
+		stop
+
+#Ignore a player to not receive or see any messages from the player
+command /ignore <player>:
+	permission: skDemand.ignore
+	trigger:
+		if arg 1 has permission "skDemand.chatignore-bypass":
+			send "&c%display name of arg 1% can not be ignored."
+			stop
+		set {skDemand.IgnoreList::%player%.%arg 1%} to display name of arg 1
+		send "&6%display name of arg 1% has been added to your ignorelist. Use /ignorelist to view."
+
+#A list of all the players you ignore
+command /ignorelist:
+	permission: skDemand.ignorelist
+	trigger:
+		loop all players:
+			if {skDemand.IgnoreList::%player%.%loop-player%} is display name of loop-player:
+				add 1 to {_number}
+				send "&4%{_number}%. &r%display name of loop-player%"
+		if  {_number} is 0:
+			send "You have not ignored anyone."
+
+command /unignore <player>:
+	permission: skDemand.unignore
+	trigger:
+		if {skDemand.IgnoreList::%player%.%arg 1%} is not set:
+			send "&cYou're not ignoring: %arg 1%"
+		else:
+			clear {skDemand.IgnoreList::%player%.%arg 1%}
+			send "&6Unignored: %arg 1%"
+				
+#Real minecraft name not nick
+command /realname <text>:
+	permission: skDemand.realname
+	description: Shows the player's realname
+	trigger:
+		loop {skDemand.Nicks::*}:
+			set {_Nick} to "%uncoloured loop-value%"
+			loop {skDemand.chat.Colour::*}:
+				replace loop-value-2 with "" in {_Nick}
+			loop {skDemand.chat.Format::*}:
+				replace loop-value-2 with "" in {_Nick}
+			loop {skDemand.chat.Ask::*}:
+				replace loop-index-2 with "" in {_Nick}
+			if arg 1 contains "%{_Nick}%":
+				send "&a%coloured loop-value-1%&6's realname is: &a%loop-index-1%"
+				stop
+		send "&cThere is no player with that nick!"
+		stop
+
+#Nick other player
+command /nickother <player> [<text>]:
+	aliases: /nicknameother, /nick
+	permission: skDemand.nickother
+	description: Changes another arg 1's nick
+	trigger:
+		if arg 2 is not set:
+			set display name of arg 1 to name of arg 1
+			clear {skDemand.Nick.On::%arg 1%}
+			send "&6You cleared &a%arg 1%&6's nick."
+			send "&6Your nick has been cleared." to arg 1
+			stop
+		else if arg 2 is "%arg 1%":
+			set display name of arg 1 to name of arg 1
+			clear {skDemand.Nick.%arg 1%}
+			send "&6You cleared &a%arg 1%&6's nick."
+			send "&6Your nick has been cleared." to arg 1
+			stop
+		else:
+			set {_text} to "%arg 2%"
+			if length of {_text} is less than 13:
+				set display name of arg 1 to "⊿%coloured arg 2%"
+				send "&a%player% &6have changed your nick to &r%display name of arg 1%&6." to arg 1
+				send "&6You changed &a%name of arg 1%&6's nick to: &r%display name of arg 1%&6."
+				set {skDemand.Nick.On::%arg 1%} to "%display name of arg 1%"
+			else:
+				send "&a%arg 1%'s &6nick can only have 12 characters."
+		
+#Nick yourself
+command /nick [<text>] [<text>]:
+	aliases: /nickname
+	permission: skDemand.nick
+	description: Changes your nick
+	trigger:
+		if arg 1 is not set:
+			set display name of player to name of player
+			clear {skDemand.Nick.On::%player%}
+			clear {skDemand.Nicks::%player%}
+			send "&6You cleared your nick"
+			stop
+		else if arg 1 is "%player%" or "%{skDemand.Nicks::%player%}%":
+			set display name of player to name of player
+			clear {skDemand.Nick.On::%player%}
+			clear {skDemand.Nicks::%player%}
+			send "&6You cleared your nick"
+			stop
+		if arg 1 is set:
+			set {_nick} to arg 1
+			replace all " " in {_nick} with ""
+			set {_l} to length of {_nick}
+			loop {_l} times:
+				add 1 to {_num}
+				set {_s} to subtext of {_nick} from characters {_num} to {_num}
+				if {_s} is not "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y" or "Z":
+					message "&cYour nick can only be letters."
+					stop
+		loop {skDemand.Player::*}:
+			if loop-index is not "%name of player%":
+				if {_nick} contains loop-index:
+					send "&6You can't have a other player's name as nick!"
+					stop
+		loop {skDemand.Nicks::*}:
+			if {_nick} contains "%uncoloured loop-value%":
+				send "&6You can't have a other player's nick as nick!"
+				stop
+		if {_nick} is set:
+			set {_text} to "%{_nick}%"
+			if length of {_text} is less than 13:
+				set {skDemand.Nicks::%player%} to "%uncoloured {_nick}%"
+				set display name of player to "⊿%coloured {_nick}%"
+				send "&6You have changed your display name to &r%display name of player%&6."
+				set {skDemand.Nick.On::%player%} to "%coloured {_nick}%"
+			else:
+				send "&6Your nick can only have 12 characters"
+				
+on join:
+	if {skDemand.Nick.On::%player%} is set:
+		set display name of player to "⊿%{skDemand.Nick.On::%player%}%"
+		
+#Colour
+command /colour [<text>]:
+	permission: skDemand.colour
+	trigger:
+		if arg 1 is not set:
+			if {skDemand.Nick.colour::%player%} is set:
+				clear {skDemand.Nick.colour::%player%}
+				send "&6You cleared your colour"
+			if {skDemand.Nick.colour::%player%} is not set:
+				send "&7&nColours you can chosse:"
+				send "∙&3 Blue"
+				send "∙&2 Green"
+				send "∙&5 Purple"
+				send "∙&c Red"
+				send "∙&e Yellow"
+		else:
+			send "&6Please write &b/colour &6to see all the alternatives you can chosse from."
+		if arg 1 is set:
+			if arg 1 is "Blue":
+				set {skDemand.Nick.colour::%player%} to "&3"
+				send "&3Your nick is now Blue!"
+			if arg 1 is "Green":
+				set {skDemand.Nick.colour::%player%} to "&2"
+				send "&2Your nick is now Green!"
+			if arg 1 is "Purple":
+				set {skDemand.Nick.colour::%player%} to "&5"
+				send "&5Your nick is now Purple!"
+			if arg 1 is "Red":
+				set {skDemand.Nick.colour::%player%} to "&c"
+				send "&cYour nick is now Red!"
+			if arg 1 is "Yellow":
+				set {skDemand.Nick.colour::%player%} to "&e"
+				send "&eYour nick is now Yellow!"
+				
+#Mail
+command /mail [<text=info>] [<integer>] [<offlineplayer>] [<text>]:
+	permission: skDemand.mail
+	trigger:
+		if arg 1 is "info" or "help":
+			message "&6To read mail use &a/mail read (the number of the mail)"
+			message "&6You write mail with &a/mail send (player) (text)"
+			message "&6You can delete old maill with &a/mail delete (all/number)"
+		else if arg 1 is "send":
+			if arg 3 is not set:
+				message "&6Use &a/mail send (player) (text)"
+				stop
+			else if arg 4 is not set:
+				message "&cPlease enter a text"
+			else if arg 3 is not offline:
+				message "&6You can only mail offline players, If you want to chat private use &a/msg (player)"
+				stop
+			else if {skDemand.Mail.%arg 3%} is not set:
+				set {skDemand.Mail.%arg 3%} to 0
+			add 1 to {skDemand.Mail.%arg 3%}
+			set {skDemand.Mail.%arg 3%::%{skDemand.Mail.%arg 3%}%} to "%player%: %arg 4%"
+			message "Message sent"
+		else if arg 1 is "read":
+			if arg 3 is not set:
+				message "---Mail %{skDemand.Mail.%player%}%/%{skDemand.Mail.%player%}% ---"
+				message "%{skDemand.Mail.%player%::%{skDemand.Mail.%player%}%}%"
+			else:
+				message "---Mail %arg 3%/%{skDemand.Mail.%player%}% ---"
+				message "%{skDemand.Mail.%player%::%arg 3%}%"
+		else if arg 1 is "delete":
+			if arg 2 is not set:
+				message "&6If you want to delete all mail use &a/mail deleteall"
+				stop
+			reduce {skDemand.Mail.%player%} by 1
+			clear {skDemand.Mail.%player%::%arg 2%}
+			set {_counter} to arg 2
+			add 1 to {_counter}
+			loop ({_counter}-2) times:
+				set {_subcounter} to ({_counter}-1)
+				set {skDemand.Mail.%player%::%{_subcounter}%} to {skDemand.Mail.%player%::%{_counter}%}
+				add 1 to {_counter}
+			message "&6Deleted mail &a%arg 2%"
+		else if arg 1 is "deleteall":
+			loop {skDemand.Mail.%player%::*}:
+				clear {skDemand.Mail.%player%::%loop-index%}
+			clear {skDemand.Mail.%player%}
+			message "&6Deleted all your mail"
+			
+On login:
+	if {skDemand.Mail.%Player%} is bigger than 0:
+		message "&6You got &a%{skDemand.Mail.%Player%}% &6new Mails."
+		message "&6Use &a/mail readnew &6to read them."
+			
+#Private Message a player
+on command "/msg":
+	if {skDemand.Chat} is not set:
+		stop
+	cancel event 
+	send "&7Please do &b/pm&7 instead."
+
+command /pm <player> <text>:
+	aliases: /tell, /t, /msg
+	permission: skDemand.pm
+	trigger:
+		if {skDemand.Chat} is not set:
+			send "&4&lPlease install &bskDemand Chat&4&l!"
+			stop
+	
+		set {_receiver} to display name of arg 1
+		set {_message} to arg 2
+		set {_receiver.real} to arg 1
+		
+		if {skDemand.Vanish::%{_receiver.real}%} is set:
+			send "&4There is no player online whose name starts with '%arg 1%&4'"
+			send "&rCorrect usage: /pm <player> <text>"
+			stop
+		
+		if {skDemand.Chat.Muted::%player%} is set:
+			send "&cYou are currently muted."
+			stop
+			
+		invoke "Text.Go.Thru" from "%player%" and "%{_message}%"
+		invoke "Rank.Prefix" from "%player%"
+		invoke "Rank.Prefix" from "% {_receiver.real}%"
+		
+		if {skDemand.Message::%player%} is set:
+			set {_message} to {skDemand.Message::%player%}
+			clear {skDemand.Message::%player%}
+		else:
+			stop
+			
+		if {skDemand.Prefix::%{_receiver.real}%} is set:
+			send "&6[me -> &r%{skDemand.Prefix::%{_receiver.real}%}%&r %{_receiver}%&6] &f%{_message}%"
+		else:
+			send "&6[me -> &r&o&l%{_receiver}%&r&6] &f%{_message}%"
+		
+		if {skDemand.Prefix::%player%} is set:
+			send "&6[&r%{skDemand.Prefix::%player%}%&r&f %player's displayname%&6 -> me] &f%{_message}%" to {_receiver.real}
+		else:
+			send "&6[&r&o&l%player's displayname%&r&6 -> me] &f%{_message}%" to {_receiver.real}
+			
+		set {skDemand.LastPM::%player%} to {_receiver.real}
+		set {skDemand.LastPM::%{_receiver.real}%} to player
+		
+		loop {skDemand.SocialSpy::*}: 
+			if loop-value is not {_receiver.real}:
+				if loop-value is not player:
+					send "&7[SocialSpy]&r &7[&r%{skDemand.Prefix::%player%}% &r%player% &7 -> &r%{skDemand.Prefix::%{_receiver.real}%}%&7 &r%{_receiver}%&7] &f%{_message}%" to loop-value
+
+on disconnect:
+	delete {skDemand.LastPM::%player%}
+			
+#Give a reply to a private message
+command /reply <text>:
+	aliases: /r
+	permission: skDemand.pm
+	trigger:
+		if {skDemand.Chat} is not set:
+			send "&4&lPlease install &bskDemand Chat&4&l!"
+			stop
+	
+		if {skDemand.LastPM::%player%} is not set:
+			send "&cYou have not received any sends recently."
+			stop
+			
+		loop all players:
+			if loop-player is {skDemand.LastPM::%player%}:
+				set {_receiver} to loop-player's displayname
+		set {_message} to arg 1
+		set {_receiver.real} to {skDemand.LastPM::%player%}
+		
+		if {skDemand.Chat.Muted::%player%} is set:
+			send "&cYou are currently muted."
+			stop
+			
+		invoke "Text.Go.Thru" from "%player%" and "%{_message}%"
+		invoke "Rank.Prefix" from "%player%"
+		invoke "Rank.Prefix" from "% {_receiver.real}%"
+		
+		if {skDemand.Message::%player%} is set:
+			set {_message} to {skDemand.Message::%player%}
+			clear {skDemand.Message::%player%}
+		else:
+			stop
+			
+		if {skDemand.Prefix::%{_receiver.real}%} is set:
+			send "&6[me -> &r%{skDemand.Prefix::%{_receiver.real}%}%&r %{_receiver}%&6] &f%{_message}%"
+		else:
+			send "&6[me -> &r&o&l%{_receiver}%&r&6] &f%{_message}%"
+		
+		if {skDemand.Prefix::%player%} is set:
+			send "&6[&r%{skDemand.Prefix::%player%}%&r&f %player's displayname%&6 -> me] &f%{_message}%" to {_receiver.real}
+		else:
+			send "&6[&r&o&l%player's displayname%&r&6 -> me] &f%{_message}%" to {_receiver.real}
+			
+		set {skDemand.LastPM::%player%} to {_receiver.real}
+		set {skDemand.LastPM::%{_receiver.real}%} to player
+		
+		loop {skDemand.SocialSpy::*}: 
+			if loop-value is not {_receiver.real}:
+				if loop-value is not player:
+					send "&7[SocialSpy]&r &7[&r%{skDemand.Prefix::%player%}% &r%player% &7 -> &r%{skDemand.Prefix::%{_receiver.real}%}%&7 &r%{_receiver}%&7] &f%{_message}%" to loop-value
+			
+		set {skDemand.LastPM::%{skDemand.LastPM::%player%}%} to player
+		
+#Tab list
+on join:
+	if player has permission "skDemand.tab.red":
+		set the player's tablist name to "&c%name of player%"
+	if player has permission "skDemand.tab.blue":
+		set the player's tablist name to "&b%name of player%"
+	if player has permission "skDemand.tab.purple":
+		set the player's tablist name to "&d%name of player%"
+	if player has permission "skDemand.tab.yellow":
+		set the player's tablist name to "&e%name of player%"
+	if player has permission "skDemand.tab.gray":
+		set the player's tablist name to "&7%name of player%"
+	if player has permission "skDemand.tab.owner":
+		set the player's tablist name to "&6&k%player%"
+	if player has permission "skDemand.tab.normal":
+		set the player's tablist name to "&o%name of player%"
+	if player has permission "skDemand.tab.gold":
+		set the player's tablist name to "&6%name of player%"
+	
+on disconnect:
+	set the player's tablist name to ""
+	
+# subfold #![<Teleportation>]
+
+#Back
+command /back:
+	permission: skDemand.back
+	description: Teleports you to your last location.
+	trigger:
+		if {skDemand.Back::%player%} is not set:
+			send "&6You don't have any last location."
+			stop
+		loop blocks above {skDemand.Back::%player%}:
+			loop-block is air
+			block above loop-block is air
+			block above loop-block is air
+			teleport player to block above loop-block
+			send "&6Teleported Back."
+			stop
+			
+on teleport:
+	set {skDemand.Back::%player%} to location of player
+	
+on death:
+	if player have permission "skDemand.back":
+		loop blocks in radius 10 around event-location:
+			if loop-block is air:
+				if block above loop-block is air:
+					if block below loop-block is not air or lava:
+						set {skDemand.Back::%player%} to loop-block
+	
+#Teleportation without requests
+command /tp <player> [<player>]: 
+	description: Teleports to a player or teleport a player to another player
+	permission: skDemand.tp
+	trigger:
+		if arg 2 is not set:
+			set {skDemand.Back::%player%} to location of player
+			wait 1 tick
+			teleport player to arg 1 
+			send "&6You've teleported to &a%arg 1%&6."
+		if arg 2 is set:
+			set {skDemand.Back::%arg 1%} to location of arg 1
+			wait 1 tick
+			teleport arg 1 to arg 2
+			send "&6You have been teleported to &a%arg 2%&6 by &a%player%&6." to arg 1
+
+command /tphere <player>:
+	permission: skDemand.tphere
+	trigger:
+		set {skDemand.Back::%arg 1%} to location of arg 1
+		wait 1 tick
+		teleport arg 1 to the player
+		send "&6You have been teleported to &a%player%&6." to arg 1
+		send "&6You've teleported &a%arg 1%&6 to you."
+		
+command /tpall:
+	permission: skDemand.tpall
+	description: Teleports all the players to you
+	trigger:
+		loop all players:
+			set {skDemand.Back::%loop-player%} to location of loop-player
+			wait 1 tick
+			teleport loop-player to location of player
+		
+#Teleportation with requests
+command /tpa <player>:
+	permission: skDemand.tpa
+	description: Teleport to an player
+	trigger:	
+		set {skDemand.tpa.%arg 1%::%player%} to now
+		send "&a%player% &6wants to teleport to you. Type &a/tpaccept %player%&6 to allow it. The request will expire in 1 minute." to arg 1
+		message "&aTeleport request was sent"
+		
+		
+command /tpahere <player>:
+	permission: skDemand.tpahere
+	description: Teleport an player to you
+	trigger:
+		set {skDemand.tpahere.%arg 1%::%player%} to now
+		send "&a%player% &6wants to teleport you to him." to arg 1
+		message "&6Teleport request was sent"
+
+		
+command /tpaall:
+	permission: skDemand.tpaall
+	description: Teleport all players to you
+	trigger:
+		loop all players:
+			set {skDemand.tpahere.%loop-player%::%player%} to now
+			send "&a%player% &6wants to teleport to you." to loop-player
+		send "&6Teleport requests were sent"
+		
+#Teleportation with requests
+command /tpaccept [<player>]:
+	trigger:
+		if arg 1 is set:
+			if {skDemand.TP%player%::%arg 1%} is "tpa":
+				set {_tpa} to arg 1
+			if {skDemand.TP%player%::%arg 1%} is "tpahere":
+				set {_tpahere} to arg 1
+			if difference between {skDemand.TPA.%player%::%arg 1%} and now is less than 1 minutes:
+				set {_tpa} to arg 1
+			if difference between {skDemand.TpaHere.%player%::%arg 1%} and now is less than 1 minutes:
+				set {_tpahere} to arg 1
+		if arg 1 is not set:
+			loop {skDemand.TPA.%player%::*}:
+				set {_difference} to loop-value
+				set {_difference} to difference between {_difference} and now
+				if {_difference} is smaller than 1 minutes:
+					set {skDemand.TP%player%::%loop-index%} to "tpa"
+					add 1 to {_tprequests}
+				if {_difference} is bigger than 1 minutes:
+					clear {skDemand.TPA.%player%::%loop-index%}
+			loop {skDemand.TpaHere.%player%::*}:
+				set {_difference} to loop-value
+				set {_difference} to difference between {_difference} and now
+				if {_difference} is smaller than 1 minutes:
+					set {skDemand.TP%player%::%loop-index%} to "tpahere"
+					add 1 to {_tprequests}
+				if {_difference} is bigger than 1 minutes:
+					clear {skDemand.TpaHere.%player%::%loop-index%}
+			if {_tprequests} is bigger than 1:
+				loop {skDemand.TP%player%::*}:
+					if loop-value is "tpa":
+						message "%loop-index% wants to teleport you to him/her"
+					if loop-value is "tpahere":
+						message "%loop-index% wants to you"
+				stop
+			loop {skDemand.TP%player%::*}:
+				if loop-value is "tpa":
+					set {skDemand.Back::%arg 1%} to location of arg 1
+					wait 1 tick
+					teleport {skDemand.TP%player%::%loop-index%} to location of player
+					send "&a%loop-index% &6was teleported to you" to player
+					send "&6You were teleported to &a%player%" to {skDemand.TP%player%::%loop-index%}
+					stop
+				if loop-value is "tpahere":
+					set {skDemand.Back::%player%} to location of player
+					wait 1 tick
+					teleport player to location of {skDemand.TP%player%::%loop-index%}
+					send "&6You were teleported to &a%{skDemand.TP%player%::%loop-index%}%" to player
+					send "&a%player% &6was teleported to you" to {skDemand.TP%player%::%loop-index%}
+					stop
+			message "&cThere aren't any teleport requests"
+		if {_tpa} is set:
+			set {skDemand.Back::%{_tpa}%} to location of {_tpa}
+			wait 1 tick
+			teleport {_tpa} to location of player
+			send "&a%{_tpa}% &6was teleported to you" to player
+			send "&6You were teleported to &a%player%" to {_tpa}
+			stop
+		if {_tpahere} is set:
+			set {skDemand.Back::%player%} to location of player
+			wait 1 tick
+			teleport player to location of {_tpa}
+			send "&6You were teleported to &a%{_tpa}%" to player
+			send "&a%player% &6was teleported to you" to {_tpa}
+			stop
+		message "&cThis player did either not request to teleport to you, or the request timed out."
+		
+every 1 minute:
+	loop all players:
+		clear {skDemand.TP%loop-player%::*}
+		
+#Home
+command /sethome:
+	permission: skDemand.sethome
+	description: Sets home
+	trigger:	
+		set {skDemand.Home.%player%} to location of player
+		send "&6Home Set."
+		
+command /home:
+	permission: skDemand.home
+	description: Teleports to home
+	trigger:
+		set {skDemand.Back::%player%} to location of player
+		wait 1 tick
+		teleport player to {skDemand.Home.%player%}
+		send "&6Home sweet Home."
+		
+#Spawn
+command /setspawn:
+	permission: skDemand.setspawn
+	description: Sets the spawn
+	trigger:
+		set {skDemand.Spawn} to location of player
+		set spawn to location of {skDemand.Spawn}
+		send "&6Spawn set in &a%world%&6!" 
+
+command /spawn:
+	permission: skDemand.spawn
+	description: Teleports you to spawn
+	trigger:
+		if player doesn't have permission "skDemand.spawnbypass":
+			send "&6Stand still for 10 seconds to teleport."
+			teleport player to location of player
+			set {_loc} to location of player
+			set {_time} to 10
+			loop 10 times:
+				if {_loc} is not location of player:
+					send "&cSpawn Teleport cancelled because of movement."
+					stop
+				wait 1 second
+				set {_time} to {_time}-1
+				if {_time} is 10 or 8 or 6 or 4 or 2:
+					send "&6%{_time}%.."
+			if {skDemand.Spawn} is set:
+				set {skDemand.Back::%player%} to location of player
+				teleport player to {skDemand.Spawn}
+			else:
+				set {skDemand.Back::%player%} to location of player
+				teleport player to spawn
+			send "&6You got teleported to spawn."
+		else:
+			if {skDemand.Spawn} is set:
+				set {skDemand.Back::%player%} to location of player
+				teleport player to {skDemand.Spawn}
+			else:
+				set {skDemand.Back::%player%} to location of player
+				teleport player to spawn
+		
+command /setfirstspawn:
+	permission: skDemand.setfirstspawn
+	description: Set the first spawn
+	trigger:
+		set {skDemand.First.Spawn} to location of player
+		message "&6First Spawn set in &a%world%&6!"	
+		
+#Warp
+command /setwarp <text> [<text>]:
+	permission: skDemand.setwarp
+	description: Creates a warp
+	aliases: /createwarp
+	trigger:
+		if {skDemand.Warp.%arg 1%.Location} is set:
+			send "&cThere is already a warp named %arg 1%"
+			stop
+		if arg 2 is set:
+			set {skDemand.Warp.%arg 1%.Permission} to "skDemand.warp.%arg 2%"
+			send "&6Warp &a%arg 1%&6 set with permission ."
+		set {skDemand.Warp.%arg 1%.Location} to location of the player
+		send "&6Warp &a%arg 1%&6 set."
+		set {skDemand.WarpList::%location of the player%} to arg 1
+
+command /delwarp <text>:
+	permission: skDemand.delwarp
+	description: Deletes a warp
+	trigger:
+		delete {skDemand.Warp.%arg 1%.Permission}
+		delete {skDemand.Warp.%arg 1%.Location}
+		send "&6Removed the warp &c%arg 1%"
+		remove arg 1 from {skDemand.WarpList::*}
+
+command /warp [<text = "list">]:
+	permission: skDemand.warplist
+	description: Shows a list of all the warps or teleports you to there
+	trigger:
+		if arg 1 is "list":
+			message "&6Warps:"
+			loop {skDemand.WarpList::*}:
+				if {skDemand.Warp.%loop-value%.Permission} is set:
+					if player has permission "%{skDemand.Warp.%loop-value%.Permission}%":
+						send "&f %{skDemand.WarpList::%{skDemand.Warp.%loop-value%.Location}%}%"
+				if {skDemand.Warp.%loop-value%.Permission} is not set:	
+					send "&f %{skDemand.WarpList::%{skDemand.Warp.%loop-value%.Location}%}%"
+		if arg 1 isn't "list":
+			if {skDemand.Warp.%arg 1%.Location} is set:
+				if {skDemand.Warp.%arg 1%.Permission} is set:
+					if player doesn't have permission "%{skDemand.Warp.%arg 1%.Permission}%":
+						message "You aren't allowed to use this warp"
+						stop
+				teleport player to {skDemand.Warp.%arg 1%.Location}
+			else:
+				send "&cUnknown warp! Use /warp to view available warps!"
+# subfold #![<Fun commands>]
+
+#Make a player fly upwards for a short duration 
+command /rocket <player>:
+	permission: skDemand.rocket
+	description: Make a player fly for a short duration
+	trigger:
+		loop 4 times:
+			wait 5 ticks
+			create explosion of force 0 at location of arg 1
+			push arg 1 upwards at speed 1
+			apply resistance 100 to arg 1 for 1 second
+		wait 1 second
+		push arg 1 downwards at speed 1
+		send "&6You tried to fly to the moon." to arg 1
+		
+#Slap a player
+command /slap <player>:
+	permission: skDemand.slap
+	description: Slap a player
+	trigger:
+		push arg 1 backwards at speed 2
+		damage arg 1 by 1 heart
+		send "&6You slapped &a%arg 1%&6."
+		send "&6You got slapped by &a%player%&6." to arg 1
+		
+#Smite & Cat
+command /smite <player>:
+	permission: skDemand.smite
+	description: Strike a lightning at a player.
+	trigger:
+		strike lightning effect at arg 1 
+		spawn 5 ocelot at arg 1
+		send "&6Thou hast been kitten & smiten" to arg 1
+		wait 5 tick
+		loop entities in arg 1's world: 
+			loop-entity is a ocelot #(WARNING THIS WILL REMOVE ALL OCELOTS IN THE WORLD)
+			kill loop-entity
+		stop
+		
+#Ride on a entity
+command /ride <entity type>:
+	permission: skDemand.ride
+	description: Ride a mob or a player
+	trigger:
+		if arg 1 is a player:
+			make the player ride arg 1
+			send "&6You are now riding &c%arg 1%!" to player
+			stop
+		if arg 1 is a entity type:
+			make the player ride arg 1 
+			apply slowness 100 to vehicle of the player for 100 hours
+			send "&6You are now riding a &c%arg 1%!" to player
+			while player is riding arg 1:
+				push vehicle of the player in horizontal facing of player at speed 0.25
+				wait 2 ticks
+			stop
+		
+#In soviet Russia an entity rides you! 
+command /rideon [<entity type>]:
+	permission: skDemand.rideon
+	description: Make a mob ride you
+	trigger:
+		spawn 1 bat at location of the player
+		set {_Riding} to the spawned entity 
+		spawn 1 of arg 1 at location of the player 
+		make the spawned entity ride {_Riding}
+		make {_Riding} ride player 
+		apply invisibility 10 to {_Riding} for 100 hours
+		#The bat is riding the command executer so that the riding entity can be seen above the command executer instead of inside the command executer's head
+		
+#Hat
+command /hat:
+	permission: skDemand.hat
+	description: Sets the hold item or block to player's helmet
+	trigger:
+		if player's tool is air:
+			send "&cPlease hold and item or a block in your hand!"
+			stop
+		if player's tool is any chestplate:
+			send "&cYou can't use armour as a hat!"
+			stop
+		if player's tool is any leggings:
+			send "&cYou can't use armour as a hat!"
+			stop
+		if player's tool is any boots:
+			send "&cYou can't use armour as a hat!"
+			stop
+		if player's tool is any sword:
+			send "&cYou can't use weapons as a hat!"
+			stop
+		set {_holding} to player's tool
+		set {_wearing} to player's helmet
+		give 1 of {_wearing} to the player
+		set helmet of the player to 1 of player's tool
+		remove 1 of {_holding} from the player
+		send "&6You now have a &a%helmet of player% &6on your head."
+		clear {_holding}
+		clear {_wearing}
+		
+# subfold #![<Miscellaneous>]
+		
+#Anti AFK
+on join:
+	clear {Last.Movement::%player%}
+	set {Last.Movement::%player%} to now
+
+on any movement:
+	clear {Last.Movement::%player%}
+	set {Last.Movement::%player%} to now
+	
+every 2.5 minutes:
+	loop all players:
+		if difference between {Last.Movement::%loop-player%} and now is greater or equal to 10 minutes:
+			loop-player is alive
+			set {_style} to "{@Anti.Afk.Style}" parsed as text
+			if {_style} is "Kill":
+				kill loop-player
+				send "&cYou have been killed for idling." to loop-player
+			if {_style} is "Kick":
+				kick loop-player due to "&cYou have been kicked for: &aIdling&c."
+				
+on disconnect:
+	clear {Last.Movement::%player%} 
+	
+on command "/stop":
+	clear {Last.Movement::*}
+
+#Kills & Deaths counter
+on damage:
+	attacker is a player
+	victim is a player
+	if {skDemand.Getting.Attacked::%victim%} is set:
+		clear {skDemand.Getting.Attacked::%victim%}
+	set {skDemand.Getting.Attacked::%victim%} to "%attacker%"
+	wait 7 seconds
+	if {skDemand.Getting.Attacked::%victim%} is attacker:
+		clear {skDemand.Getting.Attacked::%victim%}
+		
+on death:
+	victim is a player
+	clear {skDemand.Kills.Life::%victim%}
+	add 1 to {skDemand.Deaths::%victim%}
+	add 1 to {skDemand.Deaths.Life::%victim%}
+	add 1 to {skDemand.Deaths.Session::%victim%}
+	if {skDemand.Getting.Attacked::%victim%} is set:
+		add 1 to {skDemand.Kills::%{skDemand.Getting.Attacked::%victim%}%}
+		add 1 to {skDemand.Kills.Life::%{skDemand.Getting.Attacked::%victim%}%}
+		add 1 to {skDemand.Kills.Session::%{skDemand.Getting.Attacked::%victim%}%}
+		
+on disconnect:
+	clear {skDemand.Kills.Session::%player%}
+	clear {skDemand.Deaths.Session::%player%}
+	clear {skDemand.Deaths.Life::%player%}
+	clear {skDemand.Kills.Life::%player%}
+		
+#Kills
+command /kills:
+	permission: skDemand.kills
+	trigger:
+		if {skDemand.Kills::%player%} is set:
+			if {skDemand.Deaths::%player%} is set:
+				set {_KD} to {skDemand.Kills::%player%}/{skDemand.Deaths::%player%}
+				send "&6K/D: &a%{_KD}%&6."
+			send "&6Total Kills: &a%{skDemand.Kills::%player%}%&6."
+		if {skDemand.Kills.Session::%player%} is set:
+			set {_onlinetime} to difference between {skDemand.Online::%player%} and now
+			send "&6Kills This Session (&b%{_onlinetime}%&6): &a%{skDemand.Kills.Session::%player%}%&6."
+		if {skDemand.Kills.Life::%player%} is set:
+			send "&6Kills This Life: &a%{skDemand.Kills.Life::%player%}%&6."
+			
+#Deaths
+command /deaths:
+	permission: skDemand.deaths
+	trigger:
+		if {skDemand.Deaths::%player%} is set:
+			if {skDemand.Kills::%player%} is set:
+				set {_KD} to {skDemand.Kills::%player%}/{skDemand.Deaths::%player%}
+				send "&6K/D: &a%{_KD}%&6."
+			send "&6Total Deaths: &a%{skDemand.Deaths::%player%}%&6."
+		if {skDemand.Deaths.Session::%player%} is set:
+			set {_onlinetime} to difference between {skDemand.Online::%player%} and now
+			send "&6Deaths This Session (&b%{_onlinetime}%&6): &a%{skDemand.Deaths.Session::%player%}%&6."
+		if {skDemand.Deaths.Life::%player%} is set:
+			send "&6Deaths This Life: &a%{skDemand.Deaths.Life::%player%}%&6."
+			
+# {skDemand.Help.Permissions::CommandsMisc::" skDemand.kills "} = "/kills: Shows info about your kills."
+# {skDemand.Help.Permissions::CommandsMisc::" skDemand.deaths "} = "/deaths: Shows info about your deaths."
+
+#Repair
+command /repair [<text>]:
+	permission: skDemand.repair
+	description: Repairs hold item or all items in inventory
+	trigger:
+		if arg 1 is "all":
+			set {_count} to 0
+			loop 36 times:
+				set {_inv.%{_count}%} to slot {_count} of player's inventory
+				add {_inv.%{_count}%} to {_gonnaberepaird::*}
+				add 1 to {_count}
+			loop {_gonnaberepaird::*}:
+				if loop-value is not air:
+					repair loop-value
+			repair helmet of player
+			repair chestplate of player
+			repair leggings of player
+			repair boots of player
+			send "&6All Items Repaired."
+		else:
+			send "&6Repaired." 
+			repair player's tool
+		
+#Heal
+command /heal [<player>]:
+	permission: skDemand.heal
+	description: Heals you.
+	trigger:
+		if arg 1 is set:
+			if player have permission "skDemand.heal.other":
+				extinguish arg 1
+				heal arg 1
+				add 10 to arg 1's hunger bar
+				remove speed, slowness, haste, mining fatigue, strength, instant health, instant damage, jump boost, nausea, regeneration, resistance, fire resistance, water breathing, invisibility, blindness, night vision, weakness, poison and wither from the player
+				send "&6You have been healed." to arg 1
+				send "&6You have healed &b%arg 1%&6."
+				stop
+		if player doesn't have permission "skDemand.healtimer.bypass":
+			set {_waited} to difference between now and {skDemand.Heal::%player%} 
+			if {_waited} is less than 5 minutes:
+				set {_timeleft} to difference between 5 minutes and {_waited}
+				send "&6&oYou have &a&o%{_timeleft}% &6&ountil you can heal again!" to player 
+				stop
+			set {skDemand.Heal::%player%} to now
+		extinguish the player
+		heal player
+		add 10 to player's hunger bar
+		remove speed, slowness, haste, mining fatigue, strength, instant health, instant damage, jump boost, nausea, regeneration, resistance, fire resistance, water breathing, invisibility, blindness, night vision, weakness, poison and wither from the player
+		send "&6You have been healed."
+		
+
+			
+#Kill
+command /kill [<player>]:
+	permission: skDemand.kill
+	description: Kills you or a player
+	trigger:
+		arg 1 is not set:
+			kill player 
+			stop
+		kill arg 1
+		send "&6You killed &a%arg 1%&6." 
+
+#Kill all entities
+command /killall [<text>]:
+	aliases: butcher
+	permission:skDemand.killall
+	description: Kills all the entity's or a special group of entity's
+	trigger:
+		set {_killed} to 0
+		loop all entities in player's world:
+			arg 1 is not set:
+				loop-entity is not a player
+				loop-entity is not a item frame 
+				loop-entity is not a painting
+				delete loop-entity
+				add 1 to {_killed} 
+			"%type of loop-entity%" is "%arg 1%": 
+				delete loop-entity 
+				add 1 to {_killed}
+			arg 1 is "passive":
+				loop-entity is of type cow or pig or sheep or squid or ocelot or villager or chicken: 
+					delete loop-entity
+					add 1 to {_killed}
+			arg 1 is "aggresive":
+				loop-entity is of type skeleton or Zombie or spider or cave spider or ghast or creeper or zombie pigman:
+					delete loop-entity 
+					add 1 to {_killed}
+			arg 1 is "help":
+				send "&6Passive (Cow, sheep ect..)"
+				send "&6Aggresive (Zombie, spider ect..)"
+		send "&6Killed %{_killed}%"
+		
+#Last Seen
+command /seen [<offlineplayer>]:
+	aliases:/lastonline, /lastseen, /status, /whois, /info
+	description: See when a player was last online
+	permission: skDemand.seen
+	trigger:
+		send " "
+		if {skDemand.Online::%arg 1%} is set:
+			set {_onlinetime} to difference between {skDemand.Online::%arg 1%} and now
+			send "&a%arg 1% &6been online for: &a%{_onlinetime}%&6."
+		If {skDemand.IP.Address::%arg 1%} is set:
+			if player have permission "skDemand.seen.extra":
+				send "&a%arg 1%'s&6 IP Address is &a%{skDemand.IP.Address::%arg 1%}%&6."
+		if player have permission "skDemand.seen.extra":
+			if helmet of arg 1 is not any helmet or none:
+				send "&a%arg 1% &6is wearing &a%helmet of arg 1% &6as a hat."
+			if arg 1's tool is not none:
+				send "&a%arg 1%'s &6current hold item or block is: &r%arg 1's tool%&6."
+		if {skDemand.Online::%arg 1%} is not set:
+			set {_quit} to difference between {skDemand.Quit::%arg 1%} and now
+			send "&a%arg 1% &6was online before: &a%{_quit}%&6."
+		if {skDemand.Chat.Muted::%arg 1%} is set:
+			send "&a%arg 1% &6is muted for &a%{skDemand.Chat.Muted::%arg 1%}%&6."
+		if {skDemand.Banned::%arg 1%} is set:
+			send "&a%arg 1% &6is banned for &a%{skDemand.Banned.Reason::%arg 1%}%&6."
+		if  {skDemand.TempBan::%arg 1%} is set:
+			wait 1 tick
+			set {_timeleft} to difference between now and {skDemand.TempBan.Time::%arg 1%}
+			set  {_timelefttime} to {skDemand.TempBan::%arg 1%}
+			reduce {_timelefttime} by {_timeleft}
+			send "&a%arg 1% &6is banned for &a%{skDemand.TempBan.Reason::%arg 1%}%&6. Time left until unban: &a%{_timelefttime}%&6."
+		if {skDemand.Balance::%arg 1%} is set:
+			send "&a%arg 1%'s &6balance is &a%{skDemand.Balance::%arg 1%}%$&6."
+		if arg 1's level is not 0:
+			send "&a%arg 1%'s &6xp level is &a%arg 1's level%&6."
+		if {skDemand.Logins::%arg 1%} is set:
+			send "&a%arg 1%&6 logged in to this server &a%{skDemand.Logins::%arg 1%}%&6 times."
+		if {skDemand.First.Time.Joined::%arg 1%} is set:
+			set {_firsttimejoined} to difference between {skDemand.First.Time.Joined::%arg 1%} and now
+			send "&6This server been running &a%{_firsttimejoined}% &6since &a%arg 1% &6joined it for the first time."
+		if {skDemand.Clans.Player.%arg 1%.Clan} is set:
+			send "&a%arg 1% &6is in clan: &a%{skDemand.Clans.Player.%arg 1%.Clan}%&6."
+		if {Ultimate::%arg 1%} is set:
+			send "&a%arg 1%&6 is in:&a Ultimate &6group."		
+		if {Premium::%arg 1%} is set:
+			send "&a%arg 1%&6 is in:&a Premium &6group."
+		
+#		if arg 1 have permission "skDemand.group.donor1":
+#			send "&a%arg 1%&6 is in:&a {@Donor1.Prefix} &6group."
+#		if arg 1 have permission "skDemand.group.donor2":
+#			send "&a%arg 1%&6 is in:&a {@Donor2.Prefix} &6group."
+#		if arg 1 have permission "skDemand.group.donor3":
+#			send "&a%arg 1%&6 is in:&a {@Donor3.Prefix} &6group."
+#		if arg 1 have permission "skDemand.group.donor4":
+#			send "&a%arg 1%&6 is in:&a {@Donor4.Prefix} &6group."
+#		if arg 1 have permission "skDemand.group.donor5":
+#			send "&a%arg 1%&6 is in:&a {@Donor5.Prefix} &6group."
+		if arg 1 have permission "skDemand.group.owner":
+			send "&a%arg 1%&6 is in:&a Owner &6group."
+		if arg 1 have permission "skDemand.group.admin":
+			send "&a%arg 1%&6 is in:&a Admin &6group."	
+		if arg 1 have permission "skDemand.group.builder":
+			send "&a%arg 1%&6 is in:&a Builder &6group."
+		if arg 1 have permission "skDemand.group.mod":
+			send "&a%arg 1%&6 is in:&a Mod &6group."
+		if {skDemand.Deaths::%arg 1%} is set:
+			send "&a%arg 1% &6died &a%{skDemand.Deaths::%arg 1%}% &6times."
+		if {skDemand.Kills::%arg 1%} is set:
+			send "&a%arg 1% &6killed &a%{skDemand.Kills::%arg 1%}% &6players."
+		if {skDemand.Contracts.Killed::%arg 1%} is set:
+			send "&a%arg 1% &6killed &a%{skDemand.Contracts.Killed::%arg 1%}% &6contracts."
+		loop {skDemand.Nicks::*}:
+			if arg 1 contains "%uncoloured loop-value%":
+				send "&a%coloured loop-value%&6's realname is: &a%loop-index%"
+		send " "
+		stop
+			
+#Suicide
+command /suicide:
+	aliases: /kamikaze, /harakiri
+	description: Commit Suicide
+	permission: skDemand.suicide
+	trigger:
+		kill player
+		
+#Clear Inventory
+command /clearinventory [<player>]:
+	permission: skDemand.ci
+	aliases: ci
+	description: Clears your inventory or another players inventory
+	trigger:
+		if arg 1 isn't "":
+			player has permission "skDemand.ciother":
+				clear the inventory of arg 1
+				set {_helmet} to arg 1's helmet
+				set {_chestplate} to arg 1's chestplate
+				set {_pants} to arg 1's leggings 
+				set {_boots} to arg 1's boots
+				remove 1 of {_helmet} from the arg 1 
+				remove 1 of {_chestplate} from the arg 1
+				remove 1 of {_pants} from the arg 1
+				remove 1 of {_boots} from the arg 1
+				send "&6Your inventory was cleared by &a%player%&6." to arg 1
+				send "&6You cleared &a%arg 1%&6's inventory."
+		else:
+			set {_helmet} to player's helmet
+			set {_chestplate} to player's chestplate
+			set {_pants} to player's leggings
+			set {_boots} to player's boots
+			remove 1 of {_helmet} from the player 
+			remove 1 of {_chestplate} from the player
+			remove 1 of {_pants} from the player
+			remove 1 of {_boots} from the player
+			clear the inventory of the player
+			send "&6Your inventory has been cleared."
+			
+#Away From Keyboard
+command /afk:
+	permission: skDemand.afk
+	description: Turns afk mode on
+	trigger:	
+		if {skDemand.AFK::%player%} is true:
+			clear {skDemand.AFK::%player%}
+			broadcast "&a%player% &6is no longer AFK." 
+			stop
+		else:
+			set {skDemand.AFK::%player%} to true
+			broadcast "&a%player% &6is now AFK."
+			stop
+			
+on any movement:
+	if {skDemand.AFK::%player%} is true: 
+		clear {skDemand.AFK::%player%}
+		broadcast "&a%player% &6is no longer AFK." 
+		stop
+		
+#Rename the item you hold
+command /nametool <text>:
+	permission: skDemand.nametool
+	aliases: /rename, /toolname
+	description: Renames the hold item or block
+	trigger:
+		set {_arg} to arg 1
+		loop {skDemand.chat.Colour::*}:
+			replace all loop-index with loop-value in {_arg} 
+		loop {skDemand.chat.Format::*}:
+			replace all loop-index with loop-value in {_arg} 
+		if {_arg} is "&eScorpion Bow": 
+			send "&cDon't even try."
+			stop 
+		if {_arg} is "&4Poison Bow": 
+			send "&cDon't even try." 
+			stop
+		set the name of the player's tool to {_arg}
+		send "&6New name of the tool is set to: &a%{_arg}%&6."
+		
+#List
+command /list:
+	permission: skDemand.list
+	aliases: /online
+	description: Shows a list of all the online players
+	trigger:
+		set {_number} to 0
+		loop all players:
+			add 1 to {_number}
+			set {_added.%loop-player%} to false
+			if loop-player has permission "skDemand.group.owner":
+				{_added.%loop-player%} is false
+				if {skDemand.Nick.On::%loop-player%} is set:
+					if {skDemand.Vanish::%loop-player%} is set:
+						add "%loop-player's display name%&8/&7(&r%loop-player%&7) &r&7[&lVANISHED&r&7]" to {_owner::*}
+					else:
+						add "%loop-player's display name%&8/&7(&r%loop-player%&7)&r" to {_owner::*}
+				else:
+					if {skDemand.Vanish::%loop-player%} is set:
+						add "%loop-player's display name% &r&7[&lVANISHED&r&7]" to {_owner::*}
+					else:
+						add loop-player to {_owner::*}
+				set {_added.%loop-player%} to true
+			else if loop-player has permission "skDemand.group.admin":
+				{_added.%loop-player%} is false
+				if {skDemand.Nick.On::%loop-player%} is set:
+					if {skDemand.Vanish::%loop-player%} is set:
+						add "%loop-player's display name%&8/&7(&r%loop-player%&7) &r&7[&lVANISHED&r&7]" to {_admin::*}
+					else:
+						add "%loop-player's display name%&8/&7(&r%loop-player%&7)&r" to {_admin::*}
+				else:
+					if {skDemand.Vanish::%loop-player%} is set:
+						add "%loop-player's display name% &r&7[&lVANISHED&r&7]" to {_admin::*}
+					else:
+						add loop-player to {_admin::*}
+				set {_added.%loop-player%} to true
+			else if loop-player has permission "skDemand.group.mod":
+				{_added.%loop-player%} is false
+				if {skDemand.Nick.On::%loop-player%} is set:
+					add "%loop-player's display name%&8/&7(&r%loop-player%&7)&r" to {_mod::*}
+				else:
+					add loop-player to {_mod::*}
+				set {_added.%loop-player%} to true
+			else if loop-player has permission "skDemand.group.builder":
+				{_added.%loop-player%} is false
+				if {skDemand.Nick.On::%loop-player%} is set:
+					add "%loop-player's display name%&8/&7(&r%loop-player%&7)&r" to {_builder::*}
+				else:
+					add loop-player to {_builder::*}
+				set {_added.%loop-player%} to true
+			else if loop-player has permission "skDemand.group.donor1":
+				{_added.%loop-player%} is false
+				if {skDemand.Nick.On::%loop-player%} is set:
+					add "%loop-player's display name%&8/&7(&r%loop-player%&7)&r" to {_donor1::*}
+				else:
+					add loop-player to {_donor1::*}
+				set {_added.%loop-player%} to true
+			else if loop-player has permission "skDemand.group.donor2":
+				{_added.%loop-player%} is false
+				if {skDemand.Nick.On::%loop-player%} is set:
+					add "%loop-player's display name%&8/&7(&r%loop-player%&7)&r" to {_donor2::*}
+				else:
+					add loop-player to {_donor2::*}
+				set {_added.%loop-player%} to true
+			else if loop-player has permission "skDemand.group.donor3":
+				{_added.%loop-player%} is false
+				if {skDemand.Nick.On::%loop-player%} is set:
+					add "%loop-player's display name%&8/&7(&r%loop-player%&7)&r" to {_donor3::*}
+				else:
+					add loop-player to {_donor3::*}
+				set {_added.%loop-player%} to true
+			else if loop-player has permission "skDemand.group.donor4":
+				{_added.%loop-player%} is false
+				if {skDemand.Nick.On::%loop-player%} is set:
+					add "%loop-player's display name%&8/&7(&r%loop-player%&7)&r" to {_donor4::*}
+				else:
+					add loop-player to {_donor4::*}
+				set {_added.%loop-player%} to true
+			else if loop-player has permission "skDemand.group.donor5":
+				{_added.%loop-player%} is false
+				if {skDemand.Nick.On::%loop-player%} is set:
+					add "%loop-player's display name%&8/&7(&r%loop-player%&7)&r" to {_donor5::*}
+				else:
+					add loop-player to {_donor5::*}
+				set {_added.%loop-player%} to true
+			else:
+				{_added.%loop-player%} is false
+				add loop-player to {_default::*}
+				set {_added.%loop-player%} to true
+			set {_added.%loop-player%} to false
+		send " "
+		send "&8[&aOnline Players &8(&a%{_number}%&7/{@Server.Max.Slots}&8)]"
+		if {_owner::*} is set:
+			send "&7(&a%size of {_owner::*}%&7) {@Owner.Prefix}&7:&r %{_owner::*}%"
+		if {_admin::*} is set:
+			send "&7(&a%size of {_admin::*}%&7) {@Admin.Prefix}&7:&r %{_admin::*}%"
+		if {_mod::*} is set:
+			send "&7(&a%size of {_mod::*}%&7) {@Mod.Prefix}&7:&r %{_mod::*}%"
+		if {_builder::*} is set:
+			send "&7(&a%size of {_builder::*}%&7) {@Builder.Prefix}&7:&r %{_builder::*}%"
+		if {_donor5::*} is set:
+			send "&7(&a%size of {_donor5::*}%&7) {@Donor5.Prefix}&7:&r %{_donor5::*}%"
+		if {_donor4::*} is set:
+			send "&7(&a%size of {_donor4::*}%&7) {@Donor4.Prefix}&7:&r %{_donor4::*}%"
+		if {_donor3::*} is set:
+			send "&7(&a%size of {_donor3::*}%&7) {@Donor3.Prefix}&7:&r %{_donor3::*}%"
+		if {_donor2::*} is set:
+			send "&7(&a%size of {_donor2::*}%&7) {@Donor2.Prefix}&7:&r %{_donor2::*}%"
+		if {_donor1::*} is set:
+			send "&7(&a%size of {_donor1::*}%&7) {@Donor1.Prefix}&7:&r %{_donor1::*}%"
+		if {_default::*} is set:
+			send "&7(&a%size of {_default::*}%&7) &f&lDefault&r&7:&r %{_default::*}%"
+		send " "
+		
+# subfold #![<API>]:
+#Invite Api
+#Selectable duration for when the invitation will expire
+#Only 1 invite at time for the inviter
+#Selectable variable prefix 
+#
+
+
+# #! Info:
+#If a player is a inviting a player to a group or anything similar please do this:
+#when invoking the sub check if the invited player is already in the "group"
+
+#Example:
+#if {Clans.Player.%{_player}%.Clan} is {Clans.Player.%player%.Clan}:
+#	send "&cThis player is already in your clan."
+#	stop
+#invoke "skDemand.Invite" from "%player%" "<the start of the variable>"
+
+#sub "skDemand.Invite":
+#	set {_player} to "%parameter 1%" parsed as player
+#	set {_var} to "%parameter 2%"
+#	set {_duration} to "%parameter 3%"
+#	if {skDemand.Invite.%{_var}%} is set:
+#		send "You have already a pending invite to "
+
+
+
+command /testonline:
+	trigger:
+		loop all players:
+			add loop-player to {_out::*}
+		loop {_out::*}:
+			message "%loop-value%"
